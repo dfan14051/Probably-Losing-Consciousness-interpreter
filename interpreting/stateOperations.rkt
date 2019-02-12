@@ -38,12 +38,12 @@
             [(eq? (caar state) varName)
                 (cons (cons varName (cdar state)) (cons (cons varValue (cdadr state)) '()))]
             [else
-                (cons
-                    (car state)
-                    (set-var-value
-                        varName
-                        varValue 
-                        (go-to-next-var-in-state state)))])))
+                (let 
+                    ([newState
+                        (set-var-value varName varValue (go-to-next-var-in-state state))])
+                    (cons 
+                        (cons (caar state) (car newState))
+                        (cons (cons (caadr state) (cadr newState)) '())))])))
 
 ;; Gets a value given a variable name
 (define get-var-value

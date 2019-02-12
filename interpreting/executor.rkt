@@ -6,7 +6,8 @@
 ;;;;   Interpreter Project
 ;;;; ***************************************************
 (require
-    "stateOperations.rkt")
+    "stateOperations.rkt"
+    "arithmetic.rkt")
 
 (provide
     execute-parse-tree)
@@ -28,21 +29,22 @@
             [(not (pair? (car parseTree)))
                 ;; The next element is not a pair, so it's an atom
                 ;; It must be a single value
+                ;; So return that value and the current state
                 (get-atom-value (car parseTree) state)]
 
             ;;;; ARITHMETIC
             [(eq? '* (caar parseTree))
-                (* (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state))]
+                (execute-arithmetic execute-parse-tree * (get-left-side parseTree) (get-right-side parseTree) state)]
             [(eq? '/ (caar parseTree))
-                (quotient (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state))]
+                (execute-arithmetic execute-parse-tree quotient (get-left-side parseTree) (get-right-side parseTree) state)]
             [(eq? '% (caar parseTree))
-                (remainder (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state))]
+                (execute-arithmetic execute-parse-tree remainder (get-left-side parseTree) (get-right-side parseTree) state)]
             [(eq? '+ (caar parseTree))
-                (+ (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state))]
+                (execute-arithmetic execute-parse-tree + (get-left-side parseTree) (get-right-side parseTree) state)]
             [(eq? '- (caar parseTree))
                 (if (null? (cddar parseTree))
-                    (* -1 (execute-parse-tree (cdar parseTree) state))
-                    (- (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state)))]
+                    (cons (* -1 (car (execute-parse-tree (cdar parseTree) state))) (cons state '()))
+                    (execute-arithmetic execute-parse-tree - (get-left-side parseTree) (get-right-side parseTree) state))]
 
             ;;;; STATEMENTS
             [(eq? 'var (caar parseTree))
@@ -54,13 +56,18 @@
             [(eq? '= (caar parseTree))
                 ;; Assigning a value to a variable
                 ;; Continue onwards with the new state
-                (execute-parse-tree
-                    (cdr parseTree)
-                    (execute-var-assign (car parseTree) state))]
+                (let*
+                    ([result
+                        (execute-var-assign (car parseTree) state)]
+                    [newState
+                        (cadr result)])
+                    (if (null? (cdr parseTree))
+                        result
+                        (execute-parse-tree (cdr parseTree) newState)))]
             [(eq? 'return (caar parseTree))
                 ;; A return statement
                 ;; Just return the result of this statement
-                (execute-parse-tree (cdar parseTree) state)]
+                (car (execute-parse-tree (cdar parseTree) state))]
 
             ;;;; FALLBACK
             [else
@@ -90,12 +97,16 @@
     ; param command The command to execute
     ; param state The current state
     (lambda (command state)
-        (set-var-value
-            (cadr command)
-            (execute-parse-tree
-                (cddr command)
-                state)
-            state)))
+        (let*
+            ([result
+                (execute-parse-tree (cddr command) state)]
+            [varValue
+                (if (pair? result) (car result) result)]
+            [resultState
+                (if (pair? result) (cadr result) state)]
+            [newState
+                (set-var-value (cadr command) varValue resultState)])
+            (cons varValue (cons newState '())))))
 
 ;; Gets the value of a single atom
 (define get-atom-value
