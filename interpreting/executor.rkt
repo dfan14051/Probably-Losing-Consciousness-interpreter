@@ -27,8 +27,18 @@
                 (get-atom-value parseTree state)]
 
             ;;;; ARITHMETIC
+            [(eq? '* (car parseTree))
+                (* (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state))]
+            [(eq? '/ (car parseTree))
+                (quotient (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state))]
+            [(eq? '% (car parseTree))
+                (remainder (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state))]
             [(eq? '+ (car parseTree))
                 (+ (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state))]
+            [(eq? '- (car parseTree))
+                (if (null? (cddr parseTree))
+                    (* -1 (execute-parse-tree (cadr parseTree) state))
+                    (- (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state)))]
             
             ;;;; MORE BASE CASES
             [(null? (car parseTree))
