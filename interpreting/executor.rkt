@@ -13,6 +13,8 @@
 
 ;; Executes a list of commands
 (define execute-parse-tree
+    ; param parseTree The parse tree to execute
+    ; param state The state to use
     (lambda (parseTree state)
         (cond
             ;;;; BASE CASES
@@ -65,6 +67,8 @@
 
 ;; Executes a variable initialization and returns the new state
 (define execute-var-init
+    ; param command The command to execute
+    ; param state The current state
     (lambda (command state)
         (if (null? (cddr command))
             ;; No value being assigned
@@ -79,6 +83,8 @@
 
 ;; Assigns a value to a variable and returns the new state
 (define execute-var-assign
+    ; param command The command to execute
+    ; param state The current state
     (lambda (command state)
         (set-var-value
             (cadr command)
@@ -89,6 +95,8 @@
 
 ;; Gets the value of a single atom
 (define get-atom-value
+    ; param a The atom to evaluate
+    ; param state The current state
     (lambda (a state)
         (if (number? a)
             a

@@ -47,6 +47,8 @@
 
 ;; Gets a value given a variable name
 (define get-var-value
+    ; param varName The variable name
+    ; param state The state to find the variable's value in
     (lambda (varName state)
         (cond
             [(null? (car state))
