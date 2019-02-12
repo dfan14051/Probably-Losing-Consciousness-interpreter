@@ -10,19 +10,29 @@
     create-state
     add-var-to-state
     set-var-value
-    get-var-value)
+    get-var-value
+    push-scope
+    pop-scope)
 
 ;; Creates a new empty state
 (define create-state
+    ;; Scope has the following format:
+    ;;  '(
+    ;;      ((deepScopeVar) (deepScopeValue))
+    ;;      ((shallowScopeVar1 shallowScopeVar2) (shallowScopeValue1 shallowScopeValue2))
+    ;;   )
+    ;; This allows for easily pushing and popping scopes as necessary
     (lambda ()
-        '(() ())))
+        '((() ()))))
 
 ;; Creates a new state that has the new variable added to the front
 (define add-var-to-state
     ; param varName is the name of the variable
     ; param state is the state to use
     (lambda (varName state)
-        (cons (cons varName (car state)) (cons (cons '() (cadr state)) '()))))
+        (cons 
+            (cons (cons varName (caar state)) (cons (cons '() (cadar state)) '()))
+            (cdr state))))
 
 ;; Creates a new state that has the variable with the correct value
 (define set-var-value
@@ -31,19 +41,25 @@
     ; param state is the state to use
     (lambda (varName varValue state)
         (cond
-            [(null? (car state))
+            [(null? state)
                 (error 
                     "variable not initialized"
                     (format "No variable named ~a" varName))]
-            [(eq? (caar state) varName)
-                (cons (cons varName (cdar state)) (cons (cons varValue (cdadr state)) '()))]
+            [(eq? (caaar state) varName)
+                (cons 
+                    (cons (cons varName (cdaar state)) (cons (cons varValue (cdadar state)) '()))
+                    (cdr state))]
             [else
                 (let 
                     ([newState
                         (set-var-value varName varValue (go-to-next-var-in-state state))])
-                    (cons 
-                        (cons (caar state) (car newState))
-                        (cons (cons (caadr state) (cadr newState)) '())))])))
+                    (if (null? (cdar state))
+                        (cons (car state) newState)
+                        (cons
+                            (cons
+                                (cons (caaar state) (caar newState))
+                                (cons (cons (caadar state) (cadar newState)) '()))
+                            (cdr newState))))])))
 
 ;; Gets a value given a variable name
 (define get-var-value
@@ -51,18 +67,42 @@
     ; param state The state to find the variable's value in
     (lambda (varName state)
         (cond
-            [(null? (car state))
+            [(null? state)
                 (error 
                     "variable not initialized"
                     (format "No variable named ~a" varName))]
-            [(eq? (caar state) varName)
-                (caadr state)]
+            [(eq? (caaar state) varName)
+                (caadar state)]
             [else
                 (get-var-value varName (go-to-next-var-in-state state))])))
+
+;; Adds a new layer for a new scope to a state
+(define push-scope
+    ; param state The state to add a scope to
+    (lambda (state)
+        (cons '(() ()) (cons state '()))))
+
+;; Removes the top layer of scope from a state
+(define pop-scope
+    ; param state The state to remove a scope from
+    (lambda (state)
+        (cdr state)))
 
 ;;;; ***************************************************
 ;;;;   HELPER FUNCTIONS
 ;;;; ***************************************************
+(define get-current-scope-state
+    (lambda (state)
+        (car state)))
+
+(define go-to-next-var-in-scope
+    (lambda (scopeState)
+        (cons (cdar scopeState) (cons (cdadr scopeState) '()))))
+
 (define go-to-next-var-in-state
     (lambda (state)
-        (cons (cdar state) (cons (cdadr state) '()))))
+        (if (null? (cdar state))
+            (pop-scope state)
+            (cons
+                (go-to-next-var-in-scope (get-current-scope-state state))
+                (cons (cdr state) '())))))

@@ -13,16 +13,23 @@
 
 ;; Gets the left-hand-side for an arithmetic operation
 (define get-left-side
+    ; param parseTree The parse three to extract the LHS from
     (lambda (parseTree)
         (cons (cadar parseTree) '())))
 
 ;; Gets the right-hand-side for an arithmetic operation
 (define get-right-side
+    ; param parseTree The parse three to extract the RHS from
     (lambda (parseTree)
         (cons (caddar parseTree) '())))
 
-;; Executes an arithmetic operation
+;; Executes an arithmetic operation, returns (value, state)
 (define execute-arithmetic
+    ; param execute-parse-tree The execution function to call to evaluate the left and right sides
+    ; param operator The arithmetic operator to use
+    ; param leftSide The left side of the operator
+    ; param rightSide The right side of the operator
+    ; param state The state to use
     (lambda (execute-parse-tree operator leftSide rightSide state)
         (let*
             ([leftOperandResult
