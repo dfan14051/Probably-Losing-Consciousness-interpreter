@@ -21,26 +21,6 @@
             [(null? parseTree)
                 ;; Don't do anything
                 '()]
-            [(not (pair? parseTree))
-                ;; It's not null or a pair, so it's an atom
-                ;; Just return that
-                (get-atom-value parseTree state)]
-
-            ;;;; ARITHMETIC
-            [(eq? '* (car parseTree))
-                (* (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state))]
-            [(eq? '/ (car parseTree))
-                (quotient (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state))]
-            [(eq? '% (car parseTree))
-                (remainder (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state))]
-            [(eq? '+ (car parseTree))
-                (+ (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state))]
-            [(eq? '- (car parseTree))
-                (if (null? (cddr parseTree))
-                    (* -1 (execute-parse-tree (cadr parseTree) state))
-                    (- (execute-parse-tree (cadr parseTree) state) (execute-parse-tree (caddr parseTree) state)))]
-            
-            ;;;; MORE BASE CASES
             [(null? (car parseTree))
                 ;; The next element is an empty list
                 ;; So just move on
@@ -49,6 +29,20 @@
                 ;; The next element is not a pair, so it's an atom
                 ;; It must be a single value
                 (get-atom-value (car parseTree) state)]
+
+            ;;;; ARITHMETIC
+            [(eq? '* (caar parseTree))
+                (* (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state))]
+            [(eq? '/ (caar parseTree))
+                (quotient (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state))]
+            [(eq? '% (caar parseTree))
+                (remainder (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state))]
+            [(eq? '+ (caar parseTree))
+                (+ (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state))]
+            [(eq? '- (caar parseTree))
+                (if (null? (cddar parseTree))
+                    (* -1 (execute-parse-tree (cdar parseTree) state))
+                    (- (execute-parse-tree (cdar parseTree) state) (execute-parse-tree (cddar parseTree) state)))]
 
             ;;;; STATEMENTS
             [(eq? 'var (caar parseTree))
@@ -66,7 +60,7 @@
             [(eq? 'return (caar parseTree))
                 ;; A return statement
                 ;; Just return the result of this statement
-                (execute-parse-tree (cadar parseTree) state)]
+                (execute-parse-tree (cdar parseTree) state)]
 
             ;;;; FALLBACK
             [else
@@ -88,7 +82,7 @@
             ;; A value being assigned at initialization
             (set-var-value
                 (cadr command)
-                (execute-parse-tree (caddr command) state)
+                (execute-parse-tree (cddr command) state)
                 (add-var-to-state (cadr command) state)))))
 
 ;; Assigns a value to a variable and returns the new state
