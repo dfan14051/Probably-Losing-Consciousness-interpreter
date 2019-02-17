@@ -2,4 +2,10 @@ var x;
 x = false;
 var y;
 y = false;
-return (x || y);
+if (y)
+    return 1;
+else if (x)
+    return x;
+else
+    x = true;
+return x;

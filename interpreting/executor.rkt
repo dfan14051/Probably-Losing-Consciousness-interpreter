@@ -9,7 +9,8 @@
     "stateOperations.rkt"
     "arithmetic.rkt"
     "comparisons.rkt"
-    "booleanops.rkt")
+    "booleanops.rkt"
+    "conditionals.rkt")
 
 (provide
     execute-parse-tree)
@@ -24,6 +25,9 @@
             [(null? parseTree)
                 ;; Don't do anything
                 '()]
+            [(not (pair? parseTree))
+                ;; The parseTree must just be an atom
+                (get-atom-value parseTree state)]
             [(null? (car parseTree))
                 ;; The next element is an empty list
                 ;; So just move on
@@ -92,7 +96,10 @@
                 ;; A return statement
                 ;; Just return the result of this statement
                 (return-value (execute-parse-tree (cdar parseTree) state))]
-            ; if
+            [(eq? 'if (caar parseTree))
+                ;; An if statement
+                ;; Evaluate what comes after for boolean value.
+                (execute-if execute-parse-tree (cdar parseTree) state)]
             ; while
 
             ;;;; FALLBACK
