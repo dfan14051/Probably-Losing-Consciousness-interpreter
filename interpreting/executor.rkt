@@ -7,7 +7,9 @@
 ;;;; ***************************************************
 (require
     "stateOperations.rkt"
-    "arithmetic.rkt")
+    "arithmetic.rkt"
+    "comparisons.rkt"
+    "booleanops.rkt")
 
 (provide
     execute-parse-tree)
@@ -46,6 +48,28 @@
                     (cons (* -1 (car (execute-parse-tree (cdar parseTree) state))) (cons state '()))
                     (execute-arithmetic execute-parse-tree - (get-left-side parseTree) (get-right-side parseTree) state))]
 
+            ;;;; COMPARISONS
+            [(eq? '== (caar parseTree))
+                (execute-equality execute-parse-tree (get-left-side parseTree) (get-right-side parseTree) state)]
+            [(eq? '!= (caar parseTree))
+                (execute-inequality execute-parse-tree (get-left-side parseTree) (get-right-side parseTree) state)]
+            [(eq? '< (caar parseTree))
+                (execute-lessthan execute-parse-tree (get-left-side parseTree) (get-right-side parseTree) state)]
+            [(eq? '> (caar parseTree))
+                (execute-greaterthan execute-parse-tree (get-left-side parseTree) (get-right-side parseTree) state)]
+            [(eq? '<= (caar parseTree))
+                (execute-lessthanoreq execute-parse-tree (get-left-side parseTree) (get-right-side parseTree) state)]
+            [(eq? '>= (caar parseTree))
+                (execute-greaterthanoreq execute-parse-tree (get-left-side parseTree) (get-right-side parseTree) state)]
+
+            ;;;; BOOLEAN OPERATORS
+            [(eq? '&& (caar parseTree))
+                (execute-and execute-parse-tree (get-left-side parseTree) (get-right-side parseTree) state)]
+            [(eq? '|| (caar parseTree))
+                (execute-or execute-parse-tree (get-left-side parseTree) (get-right-side parseTree) state)]
+            [(eq? '! (caar parseTree))
+                (execute-not execute-parse-tree (cdar parseTree) state)]
+
             ;;;; STATEMENTS
             [(eq? 'var (caar parseTree))
                 ;; Creating a new variable
@@ -68,6 +92,8 @@
                 ;; A return statement
                 ;; Just return the result of this statement
                 (return-value (execute-parse-tree (cdar parseTree) state))]
+            ; if
+            ; while
 
             ;;;; FALLBACK
             [else
