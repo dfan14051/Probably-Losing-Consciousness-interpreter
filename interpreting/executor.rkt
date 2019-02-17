@@ -67,7 +67,7 @@
             [(eq? 'return (caar parseTree))
                 ;; A return statement
                 ;; Just return the result of this statement
-                (car (execute-parse-tree (cdar parseTree) state))]
+                (return-value (execute-parse-tree (cdar parseTree) state))]
 
             ;;;; FALLBACK
             [else
@@ -113,6 +113,16 @@
     ; param a The atom to evaluate
     ; param state The current state
     (lambda (a state)
-        (if (number? a)
-            a
-            (get-var-value a state))))
+        (cond
+          [(number? a) a]
+          [(eq? a 'true) a]
+          [(eq? a 'false) a]
+          [else (get-var-value a state)])))
+
+;; Returns the value of the return statement
+(define return-value
+  ; param value The value to return
+  (lambda (value)
+    (if (pair? value)
+        (car value)
+        value)))
