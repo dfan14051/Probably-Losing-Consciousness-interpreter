@@ -7,5 +7,5 @@ if (y)
 else if (x)
     return x;
 else
-    x = true;
-return x;
+    y = true;
+return y;

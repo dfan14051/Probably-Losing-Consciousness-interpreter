@@ -44,7 +44,7 @@
             [(null? state)
                 (error 
                     "variable not initialized"
-                    (format "No variable named ~a" varName))]
+                    (format "No variable named ~a, cannot set value" varName))]
             [(eq? (caaar state) varName)
                 (cons 
                     (cons (cons varName (cdaar state)) (cons (cons varValue (cdadar state)) '()))
@@ -70,7 +70,9 @@
             [(null? state)
                 (error 
                     "variable not initialized"
-                    (format "No variable named ~a" varName))]
+                    (format "No variable named ~a, cannot get value" varName))]
+            [(null? (caar state))
+                (get-var-value varName (pop-scope state))]
             [(eq? (caaar state) varName)
                 (caadar state)]
             [else
@@ -80,7 +82,7 @@
 (define push-scope
     ; param state The state to add a scope to
     (lambda (state)
-        (cons '(() ()) (cons state '()))))
+        (cons '(() ()) state)))
 
 ;; Removes the top layer of scope from a state
 (define pop-scope
@@ -97,7 +99,9 @@
 
 (define go-to-next-var-in-scope
     (lambda (scopeState)
-        (cons (cdar scopeState) (cons (cdadr scopeState) '()))))
+        (cons
+            (cdar scopeState)
+            (cons (cdadr scopeState) '()))))
 
 (define go-to-next-var-in-state
     (lambda (state)
@@ -105,4 +109,4 @@
             (pop-scope state)
             (cons
                 (go-to-next-var-in-scope (get-current-scope-state state))
-                (cons (cdr state) '())))))
+                (cdr state)))))

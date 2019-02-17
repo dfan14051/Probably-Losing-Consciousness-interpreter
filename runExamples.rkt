@@ -11,4 +11,4 @@
     "interpreting/interpreter.rkt")
 
 (parser "examples/test.txt")
-;(interpret "examples/test.txt")
+(interpret "examples/test.txt")

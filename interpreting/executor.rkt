@@ -24,7 +24,7 @@
             ;;;; BASE CASES
             [(null? parseTree)
                 ;; Don't do anything
-                '()]
+                state]
             [(not (pair? parseTree))
                 ;; The parseTree must just be an atom
                 (get-atom-value parseTree state)]
@@ -99,7 +99,9 @@
             [(eq? 'if (caar parseTree))
                 ;; An if statement
                 ;; Evaluate what comes after for boolean value.
-                (execute-if execute-parse-tree (cdar parseTree) state)]
+                (execute-parse-tree 
+                    (cdr parseTree)
+                    (state-value (execute-if execute-parse-tree (car parseTree) state)))]
             ; while
 
             ;;;; FALLBACK
@@ -154,8 +156,16 @@
 
 ;; Returns the value of the return statement
 (define return-value
-  ; param value The value to return
-  (lambda (value)
-    (if (pair? value)
-        (car value)
-        value)))
+    ; param value The value to return
+    (lambda (value)
+        (if (pair? value)
+            (car value)
+            value)))
+
+;; Returns the value of the state
+(define state-value
+    ; param value The value to return
+    (lambda (value)
+        (if (and (pair? value) (not (pair? (car value))))
+            (cadr value)
+            value)))
