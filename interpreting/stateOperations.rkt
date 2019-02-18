@@ -32,9 +32,13 @@
     ; param varName is the name of the variable
     ; param state is the state to use
     (lambda (varName state)
-        (cons 
-            (cons (cons varName (caar state)) (cons (cons '() (cadar state)) '()))
-            (cdr state))))
+        (if (does-var-exist-in-cur-scope? varName (get-current-scope-state state))
+            (error
+                "variable already initialized"
+                (format "Variable ~a already exists in current scope" varName))
+            (cons
+                (cons (cons varName (caar state)) (cons (cons '() (cadar state)) '()))
+                (cdr state)))))
 
 ;; Creates a new state that has the variable with the correct value
 (define set-var-value
@@ -114,6 +118,16 @@
 (define get-current-scope-state
     (lambda (state)
         (car state)))
+
+(define does-var-exist-in-cur-scope?
+    (lambda (varName scopeState)
+        (cond
+            [(or (null? scopeState) (null? (car scopeState)))
+                #f]
+            [(eq? (caar scopeState) varName)
+                #t]
+            [else
+                (does-var-exist-in-cur-scope? varName (cdr scopeState))])))
 
 (define go-to-next-var-in-scope
     (lambda (scopeState)
