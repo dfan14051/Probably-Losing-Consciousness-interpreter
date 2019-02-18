@@ -1,5 +1,11 @@
 var x;
-x = 0;
-while (x < 10)
-    x = x + 2;
-return x;
+x = false;
+var y;
+y = false;
+if (y)
+    return 1;
+else if (x)
+    return x;
+else
+    y = true;
+return y;

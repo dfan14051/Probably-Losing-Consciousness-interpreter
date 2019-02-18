@@ -13,35 +13,30 @@
     ; param execute-parse-tree The execution function to call to evaluate the left and right sides
     ; param condition The condition to be evaluated by the conditional
     ; param state The state to use
-  (lambda (execute-parse-tree condition state)
-    (let*
-      ([conditionResult
-         (execute-parse-tree (car condition) state)]
-       [conditionValue
-         (if (list? conditionResult)
-             (car conditionResult)
-             conditionResult)]
-       [newState
-         (if (list? conditionResult)
-             (cadr conditionResult)
-             state)]
-       [result
-         (if (eq? conditionValue 'true)
-             (execute-parse-tree (cadr condition) (push-scope state))
-             (execute-parse-tree (caddr condition) (push-scope state)))]
-       [resultValue
-         (if (list? result)
-             (car result)
-             result)]
-       [resultState
-         (if (list? result)
-             (pop-scope (cadr result))
-             state)])
-       (cons resultValue (cons resultState '())))))
-       
-(define execute-while
+     (lambda (execute-parse-tree parseTree state)
+        (let*
+            ([conditionResult
+                (execute-parse-tree (cons (cadr parseTree) '()) state)]
+            [conditionValue
+                (if (pair? conditionResult)
+                    (car conditionResult)
+                    conditionResult)]
+            [postConditionState
+                (if (pair? conditionResult)
+                    (cadr conditionResult)
+                    state)])
+            (cond
+                [(eq? conditionValue 'true)
+                    (execute-parse-tree (cons (caddr parseTree) '()) postConditionState)]
+                [(null? (cdddr parseTree))
+                    state]
+                [else
+                    (execute-parse-tree (cons (cadddr parseTree) '()) postConditionState)])
+    )))
+     
+;(define execute-while
     ; param execute-parse-tree The execution function to call to evaluate the left and right sides
     ; param condition The condition to be evaluated by the conditional
     ; param state The state to use
-  (lambda (execute-parse-tree condition state)
- 
+;  (lambda (execute-parse-tree condition state)))
+
