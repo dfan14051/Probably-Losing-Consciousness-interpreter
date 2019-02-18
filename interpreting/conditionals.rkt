@@ -39,3 +39,9 @@
              state)])
        (cons resultValue (cons resultState '())))))
        
+(define execute-while
+    ; param execute-parse-tree The execution function to call to evaluate the left and right sides
+    ; param condition The condition to be evaluated by the conditional
+    ; param state The state to use
+  (lambda (execute-parse-tree condition state)
+ 

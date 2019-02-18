@@ -100,7 +100,9 @@
                 ;; An if statement
                 ;; Evaluate what comes after for boolean value.
                 (execute-if execute-parse-tree (cdar parseTree) state)]
-            ; while
+            [(eq? 'while (caar parseTree))
+                ;; A while loop
+                (execute-while execute-parse-tree (cdar parseTree) state)]
 
             ;;;; FALLBACK
             [else
