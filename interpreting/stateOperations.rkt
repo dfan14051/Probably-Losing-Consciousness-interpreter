@@ -127,7 +127,7 @@
             [(eq? (caar scopeState) varName)
                 #t]
             [else
-                (does-var-exist-in-cur-scope? varName (cdr scopeState))])))
+                (does-var-exist-in-cur-scope? varName (go-to-next-var-in-scope scopeState))])))
 
 (define go-to-next-var-in-scope
     (lambda (scopeState)
