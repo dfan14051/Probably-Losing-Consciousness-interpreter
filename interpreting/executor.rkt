@@ -128,12 +128,6 @@
                 (cadr command)
                 state)
             ;; A value being assigned at initialization
-            ;(execute-var-assign
-            ;    (list
-            ;        '=
-            ;        (cadr command)
-            ;        (return-value (execute-parse-tree (cddr command) state)))
-            ;    (add-var-to-state (cadr command) state)))))
             (let*
                 ([result
                     (execute-parse-tree (cddr command) state)]
