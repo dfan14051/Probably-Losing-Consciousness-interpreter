@@ -35,19 +35,19 @@
             ([leftOperandResult
                 (execute-parse-tree leftSide state)]
             [leftOperand
-                (if (list? leftOperandResult)
+                (if (pair? leftOperandResult)
                     (car leftOperandResult)
                     leftOperandResult)]
             [rightOperandResult
-                (execute-parse-tree rightSide (if (list? leftOperandResult) (cadr leftOperandResult) state))]
+                (execute-parse-tree rightSide (if (pair? leftOperandResult) (cadr leftOperandResult) state))]
             [rightOperand
-                (if (list? rightOperandResult)
+                (if (pair? rightOperandResult)
                     (car rightOperandResult)
                     rightOperandResult)]
             [newState
-                (if (list? rightOperandResult)
+                (if (pair? rightOperandResult)
                     (cadr rightOperandResult)
-                    (if (list? leftOperandResult)
+                    (if (pair? leftOperandResult)
                         (cadr leftOperandResult)
                         state))])
             (cons (operator leftOperand rightOperand) (cons newState '())))))

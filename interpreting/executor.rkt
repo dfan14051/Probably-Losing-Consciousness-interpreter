@@ -128,10 +128,23 @@
                 (cadr command)
                 state)
             ;; A value being assigned at initialization
-            (set-var-value
-                (cadr command)
-                (return-value (execute-parse-tree (cddr command) state))
-                (add-var-to-state (cadr command) state)))))
+            ;(execute-var-assign
+            ;    (list
+            ;        '=
+            ;        (cadr command)
+            ;        (return-value (execute-parse-tree (cddr command) state)))
+            ;    (add-var-to-state (cadr command) state)))))
+            (let*
+                ([result
+                    (execute-parse-tree (cddr command) state)]
+                [varValue
+                    (if (pair? result) (car result) result)]
+                [resultState
+                    (if (pair? result) (cadr result) state)])
+                (set-var-value
+                    (cadr command)
+                    varValue
+                    (add-var-to-state (cadr command) resultState))))))
 
 ;; Assigns a value to a variable and returns the new state
 (define execute-var-assign
