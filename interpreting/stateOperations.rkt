@@ -12,7 +12,9 @@
     set-var-value
     get-var-value
     push-scope
-    pop-scope)
+    pop-scope
+    return-value
+    state-value)
 
 ;; Creates a new empty state
 (define create-state
@@ -89,6 +91,22 @@
     ; param state The state to remove a scope from
     (lambda (state)
         (cdr state)))
+
+;; Returns the value of the return statement
+(define return-value
+    ; param value The value to return
+    (lambda (value)
+        (if (pair? value)
+            (car value)
+            value)))
+
+;; Returns the value of the state
+(define state-value
+    ; param value The value to return
+    (lambda (value)
+        (if (and (pair? value) (not (pair? (car value))))
+            (cadr value)
+            value)))
 
 ;;;; ***************************************************
 ;;;;   HELPER FUNCTIONS

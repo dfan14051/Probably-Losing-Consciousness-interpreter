@@ -13,8 +13,7 @@
     "conditionals.rkt")
 
 (provide
-    execute-parse-tree
-    state-value)
+    execute-parse-tree)
 
 ;; Executes a list of commands
 (define execute-parse-tree
@@ -159,12 +158,3 @@
           [(eq? a 'true) a]
           [(eq? a 'false) a]
           [else (get-var-value a state)])))
-
-;; Returns the value of the return statement
-(define return-value
-    ; param value The value to return
-    (lambda (value)
-        (if (pair? value)
-            (car value)
-            value)))
-

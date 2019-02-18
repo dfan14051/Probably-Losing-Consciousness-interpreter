@@ -59,11 +59,3 @@
                       parseTree
                       (state-value (execute-parse-tree (cons (caddr parseTree) '()) postConditionState)))]
                 [else postConditionState]))))
-
-;; Returns the value of the state
-(define state-value
-    ; param value The value to return
-    (lambda (value)
-        (if (and (pair? value) (not (pair? (car value))))
-            (cadr value)
-            value)))
