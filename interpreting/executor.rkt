@@ -23,6 +23,8 @@
     (lambda (parseTree state)
         (cond
             ;;;; BASE CASES
+            [(not (pair? state))
+                state]
             [(null? parseTree)
                 ;; Don't do anything
                 state]
@@ -129,7 +131,7 @@
             ;; A value being assigned at initialization
             (set-var-value
                 (cadr command)
-                (execute-parse-tree (cddr command) state)
+                (return-value (execute-parse-tree (cddr command) state))
                 (add-var-to-state (cadr command) state)))))
 
 ;; Assigns a value to a variable and returns the new state

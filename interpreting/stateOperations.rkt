@@ -46,11 +46,11 @@
                     "variable not initialized"
                     (format "No variable named ~a, cannot set value" varName))]
             [(eq? (caaar state) varName)
-                (cons 
-                    (cons (cons varName (cdaar state)) (cons (cons varValue (cdadar state)) '()))
+                (cons
+                    (cons (caar state) (cons (cons varValue (cdadar state)) '()))
                     (cdr state))]
             [else
-                (let 
+                (let
                     ([newState
                         (set-var-value varName varValue (go-to-next-var-in-state state))])
                     (if (null? (cdar state))
