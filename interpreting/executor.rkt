@@ -13,7 +13,8 @@
     "conditionals.rkt")
 
 (provide
-    execute-parse-tree)
+    execute-parse-tree
+    state-value)
 
 ;; Executes a list of commands
 (define execute-parse-tree
@@ -102,9 +103,11 @@
                 (execute-parse-tree 
                     (cdr parseTree)
                     (state-value (execute-if execute-parse-tree (car parseTree) state)))]
-            ;[(eq? 'while (caar parseTree))
+            [(eq? 'while (caar parseTree))
                 ;; A while loop
-            ;    (execute-while execute-parse-tree (cdar parseTree) state)]
+                (execute-parse-tree
+                    (cdr parseTree)
+                    (state-value (execute-while execute-parse-tree (car parseTree) state)))]
 
             ;;;; FALLBACK
             [else
@@ -150,8 +153,7 @@
     ; param a The atom to evaluate
     ; param state The current state
     (lambda (a state)
-        (cond
-          [(number? a) a]
+        (cond [(number? a) a]
           [(eq? a 'true) a]
           [(eq? a 'false) a]
           [else (get-var-value a state)])))
@@ -164,10 +166,3 @@
             (car value)
             value)))
 
-;; Returns the value of the state
-(define state-value
-    ; param value The value to return
-    (lambda (value)
-        (if (and (pair? value) (not (pair? (car value))))
-            (cadr value)
-            value)))

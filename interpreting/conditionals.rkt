@@ -6,7 +6,9 @@
 ;;;;   Interpreter Project
 ;;;; ***************************************************
 
-(require "stateOperations.rkt")
+(require 
+    "stateOperations.rkt")
+
 (provide (all-defined-out))
 
 (define execute-if
@@ -34,9 +36,34 @@
                     (execute-parse-tree (cons (cadddr parseTree) '()) postConditionState)])
     )))
      
-;(define execute-while
+(define execute-while
     ; param execute-parse-tree The execution function to call to evaluate the left and right sides
     ; param condition The condition to be evaluated by the conditional
     ; param state The state to use
-;  (lambda (execute-parse-tree condition state)))
+     (lambda (execute-parse-tree parseTree state)
+        (let*
+            ([conditionResult
+                (execute-parse-tree (cons (cadr parseTree) '()) state)]
+            [conditionValue
+                (if (pair? conditionResult)
+                    (car conditionResult)
+                    conditionResult)]
+            [postConditionState
+                (if (pair? conditionResult)
+                    (cadr conditionResult)
+                    state)])
+            (cond
+                [(eq? conditionValue 'true)
+                    (execute-while
+                      execute-parse-tree
+                      parseTree
+                      (state-value (execute-parse-tree (cons (caddr parseTree) '()) postConditionState)))]
+                [else postConditionState]))))
 
+;; Returns the value of the state
+(define state-value
+    ; param value The value to return
+    (lambda (value)
+        (if (and (pair? value) (not (pair? (car value))))
+            (cadr value)
+            value)))
