@@ -18,7 +18,7 @@
                     [(eq? (caddar unitTests) result)
                         (writeln (format "~a succeeded" (caar unitTests)))]
                     [(cadar unitTests)
-                        (writeln (format "~a failed; expected ~b, got ~c" (caar unitTests) (caddar unitTests) result))]
+                        (writeln (format "~a failed; expected ~v, got ~v" (caar unitTests) (caddar unitTests) result))]
                     [else
                         (writeln (format "~a did not throw when expected to" (caar unitTests)))])))
         (if (null? (cdr unitTests))

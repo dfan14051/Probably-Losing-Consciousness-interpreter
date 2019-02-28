@@ -37,7 +37,7 @@
                 "variable already initialized"
                 (format "Variable ~a already exists in current scope" varName))
             (cons
-                (cons (cons varName (caar state)) (cons (cons '() (cadar state)) '()))
+                (list (cons varName (caar state)) (cons '() (cadar state)))
                 (cdr state)))))
 
 ;; Creates a new state that has the variable with the correct value
