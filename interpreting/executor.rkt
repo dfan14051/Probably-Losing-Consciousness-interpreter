@@ -20,6 +20,22 @@
             [(null? parseTree)
                 (list '() state)]
 
+            ;; Code blocks
+            [(eq? 'begin (caar parseTree))
+                (execute-parse-tree
+                    (cdr parseTree)
+                    (pop-scope
+                        (execute-parse-tree
+                            (cdar parseTree)
+                            (push-scope state)
+                            (lambda (v s)
+                                (return v (pop-scope s)))
+                            (lambda (e s)
+                                (throw e (pop-scope s)))
+                            (lambda (s)
+                                (break (pop-scope s)))))
+                    return throw break)]
+
             ;; Return, throw, break, continue
             [(eq? 'return (caar parseTree))
                 (return 
