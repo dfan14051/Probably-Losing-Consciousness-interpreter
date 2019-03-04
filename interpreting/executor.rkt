@@ -96,13 +96,7 @@
 
 (define execute-if-return-new-state
     (lambda (parseTree state return throw break)
-        (let
-            ([conditionResult
-                (evaluate-parse-tree
-                    (cadar parseTree) state
-                    update-state-from-parse-tree)]
-            [postConditionState
-                (update-state-from-parse-tree (cadar parseTree) state)])
+        ((lambda (conditionResult postConditionState)
             (cond
                 [(eq? conditionResult 'true)
                     (cadr (execute-parse-tree
@@ -115,18 +109,15 @@
                     (cadr (execute-parse-tree
                         (list (car (cdddar parseTree)))
                         postConditionState
-                        return throw break))]))))
+                        return throw break))]))
+            (evaluate-parse-tree
+                (cadar parseTree) state
+                update-state-from-parse-tree)
+            (update-state-from-parse-tree (cadar parseTree) state))))
 
 (define execute-while-return-new-state
     (lambda (parseTree state old-break return throw break)
-        (let
-            ([conditionResult
-                (evaluate-parse-tree
-                    (cadar parseTree) state
-                    update-state-from-parse-tree)]
-            [postConditionState
-                (update-state-from-parse-tree
-                    (cadar parseTree) state)])
+        ((lambda (conditionResult postConditionState)
             (if (eq? conditionResult 'true)
                 (execute-while-return-new-state
                     parseTree
@@ -136,4 +127,9 @@
                         return throw break))
                     old-break
                     return throw break)
-                postConditionState))))
+                postConditionState))
+            (evaluate-parse-tree
+                    (cadar parseTree) state
+                    update-state-from-parse-tree)
+            (update-state-from-parse-tree
+                    (cadar parseTree) state))))

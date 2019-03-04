@@ -56,16 +56,15 @@
                     (cons (caar state) (cons (cons varValue (cdadar state)) '()))
                     (cdr state))]
             [else
-                (let
-                    ([newState
-                        (set-var-value varName varValue (go-to-next-var-in-state state))])
+                ((lambda (newState)
                     (if (null? (cdar state))
                         (cons (car state) newState)
                         (cons
                             (cons
                                 (cons (caaar state) (caar newState))
                                 (cons (cons (caadar state) (cadar newState)) '()))
-                            (cdr newState))))])))
+                            (cdr newState))))
+                    (set-var-value varName varValue (go-to-next-var-in-state state)))])))
 
 ;; Gets a value given a variable name
 (define get-var-value
