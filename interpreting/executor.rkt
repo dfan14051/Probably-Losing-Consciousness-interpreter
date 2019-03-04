@@ -53,13 +53,13 @@
             [(eq? 'while (caar parseTree))
                 (execute-parse-tree
                     (cdr parseTree)
-                        (call/cc
-                            (lambda (while-break)
-                                (execute-while-return-new-state
-                                    parseTree state
-                                    break
-                                    return throw while-break)))
-                        return throw break)]
+                    (call/cc
+                        (lambda (while-break)
+                            (execute-while-return-new-state
+                                parseTree state
+                                break
+                                return throw while-break)))
+                    return throw break)]
             [else
                 (execute-parse-tree
                     (cdr parseTree)
