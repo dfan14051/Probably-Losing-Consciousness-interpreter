@@ -2,4 +2,6 @@ var x;
 var y = 8;
 var z;
 x = z = 6;
+if (x > 2)
+    return x;
 return x * (y + ((z = 5) % 3)) / 11 - 9;

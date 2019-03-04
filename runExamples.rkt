@@ -10,5 +10,8 @@
     "parsing/simpleParser.rkt"
     "interpreting/interpreter.rkt")
 
+(parser "examples/toy_example.txt")
+(interpret "examples/toy_example.txt")
+
 (parser "examples/example_01.txt")
 (interpret "examples/example_01.txt")

@@ -18,4 +18,14 @@
 (define interpret
     ;; param filePath is the name of the file to interpret
     (lambda (filePath)
-        (execute-parse-tree (parser filePath) (create-state))))
+        (call/cc
+            (lambda (k)
+                (execute-parse-tree
+                (parser filePath)
+                (create-state)
+                (lambda (value state)
+                    (k value))
+                (lambda (e)
+                    (error
+                        "Uncaught exception"
+                        e)))))))

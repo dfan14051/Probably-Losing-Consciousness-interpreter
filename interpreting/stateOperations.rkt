@@ -37,7 +37,7 @@
                 "variable already initialized"
                 (format "Variable ~a already exists in current scope" varName))
             (cons
-                (cons (cons varName (caar state)) (cons (cons '() (cadar state)) '()))
+                (list (cons varName (caar state)) (cons '() (cadar state)))
                 (cdr state)))))
 
 ;; Creates a new state that has the variable with the correct value
@@ -56,16 +56,15 @@
                     (cons (caar state) (cons (cons varValue (cdadar state)) '()))
                     (cdr state))]
             [else
-                (let
-                    ([newState
-                        (set-var-value varName varValue (go-to-next-var-in-state state))])
+                ((lambda (newState)
                     (if (null? (cdar state))
                         (cons (car state) newState)
                         (cons
                             (cons
                                 (cons (caaar state) (caar newState))
                                 (cons (cons (caadar state) (cadar newState)) '()))
-                            (cdr newState))))])))
+                            (cdr newState))))
+                    (set-var-value varName varValue (go-to-next-var-in-state state)))])))
 
 ;; Gets a value given a variable name
 (define get-var-value
