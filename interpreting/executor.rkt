@@ -24,7 +24,7 @@
             [(eq? 'begin (caar parseTree))
                 (execute-parse-tree
                     (cdr parseTree)
-                    (pop-scope
+                    (pop-scope (cadr
                         (execute-parse-tree
                             (cdar parseTree)
                             (push-scope state)
@@ -33,7 +33,7 @@
                             (lambda (e s)
                                 (throw e (pop-scope s)))
                             (lambda (s)
-                                (break (pop-scope s)))))
+                                (break (pop-scope s))))))
                     return throw break)]
 
             ;; Return, throw, break, continue
