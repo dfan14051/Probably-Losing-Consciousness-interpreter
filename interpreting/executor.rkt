@@ -45,6 +45,14 @@
                     (update-state-from-parse-tree 
                         (cadar parseTree)
                         state))]
+            [(eq? 'throw (caar parseTree))
+                (throw
+                    (evaluate-parse-tree 
+                        (cadar parseTree) state
+                        update-state-from-parse-tree) 
+                    (update-state-from-parse-tree 
+                        (cadar parseTree)
+                        state))]
             [(eq? 'break (caar parseTree))
                 (if (null? break)
                     (error
