@@ -70,49 +70,73 @@
             [(eq? 'try (caar parseTree))
                 (execute-parse-tree
                     (cdr parseTree)
-                    (pop-scope (cadr (execute-parse-tree
-                        (cdddar parseTree)
-                        (push-scope
-                            (pop-scope (cadr
+                    (pop-scope 
+                        (cadr 
                             (execute-parse-tree
-                                (cadar parseTree)
-                                (push-scope state)
+                                (cdddar parseTree)
+                                (push-scope
+                                    (pop-scope (cadr
+                                    (execute-parse-tree
+                                        (cadar parseTree)
+                                        (push-scope state)
+                                        (lambda (v s)
+                                            (return v 
+                                                (pop-scope 
+                                                    (cadr 
+                                                        (execute-parse-tree
+                                                            (cdddar parseTree)
+                                                            (push-scope state)
+                                                            (lambda (v s)
+                                                                (return v (pop-scope s)))
+                                                            (lambda (e s)
+                                                                (throw e (pop-scope s)))
+                                                            (lambda (s)
+                                                                (break (pop-scope s))))))))
+                                        (lambda (e s)
+                                            (throw e (pop-scope s))
+                                            ;; idk lol catch e somehow
+                                            )
+                                        (lambda (s)
+                                            (break 
+                                                (pop-scope
+                                                    (cadr 
+                                                        (execute-parse-tree
+                                                            (cdddar parseTree)
+                                                            (push-scope state)
+                                                            (lambda (v s)
+                                                                (return v (pop-scope s)))
+                                                            (lambda (e s)
+                                                                (throw e (pop-scope s)))
+                                                            (lambda (s)
+                                                                (break (pop-scope s))))))))))))
+                                ;; TODO(NOAH): PLS DOUBLE CHECK THESE
                                 (lambda (v s)
-                                    (return v 
-                                        (pop-scope 
-                                            (execute-parse-tree
-                                                (cdddar parseTree)
-                                                (push-scope state)
-                                                (lambda (v s)
-                                                    (return v (pop-scope s)))
-                                                (lambda (e s)
-                                                    (throw e (pop-scope s)))
-                                                (lambda (s)
-                                                    (break (pop-scope s)))))))
+                                    (return v (pop-scope s)))
                                 (lambda (e s)
-                                    (throw e (pop-scope s))
-                                    ;; idk lol catch e somehow
-                                    )
+                                    (throw e (pop-scope s)))
                                 (lambda (s)
-                                    (break (pop-scope 
-                                                (execute-parse-tree
-                                                (cdddar parseTree)
-                                                (push-scope state)
-                                                (lambda (v s)
-                                                    (return v (pop-scope s)))
-                                                (lambda (e s)
-                                                    (throw e (pop-scope s)))
-                                                (lambda (s)
-                                                    (break (pop-scope s))))))))))))))
-                            (lambda (v s)
-                                (return v (pop-scope s))
-                            (lambda (e s)
-                                (throw e (pop-scope s)))
-                            (lambda (s)
-                                (break (pop-scope s)))))))]
+                                    (break (pop-scope s))))))
+                    return throw break)]
             [(eq? 'catch (caar parseTree))
                 (execute-parse-tree
-                    ]
+                    (cdr parseTree)
+                    state
+                    ; (pop-scope 
+                    ;     (cadr
+                    ;        (execute-parse-tree
+                                ; (;; AHHHHHHH))))
+                    return throw break)]
+            [(eq? 'finally (caar parseTree))
+                (execute-parse-tree
+                    (cadar parseTree)
+                    (push-scope state)
+                    (lambda (v s)
+                        (return v (pop-scope s)))
+                    (lambda (e s)
+                        (throw e (pop-scope s)))
+                    (lambda (s)
+                        (break (pop-scope s))))]
+
                                     
 
             ;; If and while

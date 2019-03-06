@@ -51,6 +51,8 @@
                 (error 
                     "variable not initialized"
                     (format "No variable named ~a, cannot set value" varName))]
+            [(null? (caar state))
+             (set-var-value varName varValue (go-to-next-var-in-state state))]
             [(eq? (caaar state) varName)
                 (cons
                     (cons (caar state) (cons (cons varValue (cdadar state)) '()))
