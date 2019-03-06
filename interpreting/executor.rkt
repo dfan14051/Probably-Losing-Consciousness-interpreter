@@ -66,6 +66,55 @@
                         "Cannot continue when not in a loop")
                     (list '() state))]
 
+            ;; Try-catch-finally
+            [(eq? 'try (caar parseTree))
+                (execute-parse-tree
+                    (cdr parseTree)
+                    (pop-scope (cadr (execute-parse-tree
+                        (cdddar parseTree)
+                        (push-scope
+                            (pop-scope (cadr
+                            (execute-parse-tree
+                                (cadar parseTree)
+                                (push-scope state)
+                                (lambda (v s)
+                                    (return v 
+                                        (pop-scope 
+                                            (execute-parse-tree
+                                                (cdddar parseTree)
+                                                (push-scope state)
+                                                (lambda (v s)
+                                                    (return v (pop-scope s)))
+                                                (lambda (e s)
+                                                    (throw e (pop-scope s)))
+                                                (lambda (s)
+                                                    (break (pop-scope s)))))))
+                                (lambda (e s)
+                                    (throw e (pop-scope s))
+                                    ;; idk lol catch e somehow
+                                    )
+                                (lambda (s)
+                                    (break (pop-scope 
+                                                (execute-parse-tree
+                                                (cdddar parseTree)
+                                                (push-scope state)
+                                                (lambda (v s)
+                                                    (return v (pop-scope s)))
+                                                (lambda (e s)
+                                                    (throw e (pop-scope s)))
+                                                (lambda (s)
+                                                    (break (pop-scope s))))))))))))))
+                            (lambda (v s)
+                                (return v (pop-scope s))
+                            (lambda (e s)
+                                (throw e (pop-scope s)))
+                            (lambda (s)
+                                (break (pop-scope s)))))))]
+            [(eq? 'catch (caar parseTree))
+                (execute-parse-tree
+                    ]
+                                    
+
             ;; If and while
             [(eq? 'if (caar parseTree))
                 (execute-parse-tree
