@@ -1,10 +1,14 @@
 var x;
 
 try {
-  x = 20;
-  x = x + 5;
+    x = 20;
+    x = x + 5;
+    throw 0;
+}
+catch (e) {
+    x = e;
 }
 finally {
-  x = x + 100;
+    x = x + 100;
 }
 return x;

@@ -25,7 +25,7 @@
                 (create-state)
                 (lambda (value state)
                     (k value))
-                (lambda (e)
+                (lambda (exception state)
                     (error
                         "Uncaught exception"
-                        e)))))))
+                        exception)))))))

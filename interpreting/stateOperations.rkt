@@ -46,13 +46,19 @@
     ; param varValue is the value to give the variable
     ; param state is the state to use
     (lambda (varName varValue state)
+        (displayln state)
         (cond
             [(null? state)
                 (error 
                     "variable not initialized"
                     (format "No variable named ~a, cannot set value" varName))]
-            [(null? (caar state))
-             (set-var-value varName varValue (go-to-next-var-in-state state))]
+            [(not (does-var-exist-in-cur-scope? varName (get-current-scope-state state)))
+                (cons
+                    (car state)
+                    (set-var-value
+                        varName
+                        varValue
+                        (pop-scope state)))]
             [(eq? (caaar state) varName)
                 (cons
                     (cons (caar state) (cons (cons varValue (cdadar state)) '()))
@@ -73,12 +79,13 @@
     ; param varName The variable name
     ; param state The state to find the variable's value in
     (lambda (varName state)
+        (displayln state)
         (cond
             [(null? state)
                 (error 
                     "variable not initialized"
                     (format "No variable named ~a, cannot get value" varName))]
-            [(null? (caar state))
+            [(not (does-var-exist-in-cur-scope? varName (get-current-scope-state state)))
                 (get-var-value varName (pop-scope state))]
             [(eq? (caaar state) varName)
                 (caadar state)]
@@ -122,6 +129,7 @@
 
 (define does-var-exist-in-cur-scope?
     (lambda (varName scopeState)
+        (display 'does-var-exist-in-cur-scope?) (display varName) (displayln scopeState)
         (cond
             [(or (null? scopeState) (null? (car scopeState)))
                 #f]

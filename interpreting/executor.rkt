@@ -70,74 +70,11 @@
             [(eq? 'try (caar parseTree))
                 (execute-parse-tree
                     (cdr parseTree)
-                    (pop-scope 
-                        (cadr 
-                            (execute-parse-tree
-                                (cdddar parseTree)
-                                (push-scope
-                                    (pop-scope (cadr
-                                    (execute-parse-tree
-                                        (cadar parseTree)
-                                        (push-scope state)
-                                        (lambda (v s)
-                                            (return v 
-                                                (pop-scope 
-                                                    (cadr 
-                                                        (execute-parse-tree
-                                                            (cdddar parseTree)
-                                                            (push-scope state)
-                                                            (lambda (v s)
-                                                                (return v (pop-scope s)))
-                                                            (lambda (e s)
-                                                                (throw e (pop-scope s)))
-                                                            (lambda (s)
-                                                                (break (pop-scope s))))))))
-                                        (lambda (e s)
-                                            (throw e (pop-scope s))
-                                            ;; idk lol catch e somehow
-                                            )
-                                        (lambda (s)
-                                            (break 
-                                                (pop-scope
-                                                    (cadr 
-                                                        (execute-parse-tree
-                                                            (cdddar parseTree)
-                                                            (push-scope state)
-                                                            (lambda (v s)
-                                                                (return v (pop-scope s)))
-                                                            (lambda (e s)
-                                                                (throw e (pop-scope s)))
-                                                            (lambda (s)
-                                                                (break (pop-scope s))))))))))))
-                                ;; TODO(NOAH): PLS DOUBLE CHECK THESE
-                                (lambda (v s)
-                                    (return v (pop-scope s)))
-                                (lambda (e s)
-                                    (throw e (pop-scope s)))
-                                (lambda (s)
-                                    (break (pop-scope s))))))
+                    (execute-try-return-new-state
+                        parseTree
+                        state
+                        return throw break)
                     return throw break)]
-            [(eq? 'catch (caar parseTree))
-                (execute-parse-tree
-                    (cdr parseTree)
-                    state
-                    ; (pop-scope 
-                    ;     (cadr
-                    ;        (execute-parse-tree
-                                ; (;; AHHHHHHH))))
-                    return throw break)]
-            [(eq? 'finally (caar parseTree))
-                (execute-parse-tree
-                    (cadar parseTree)
-                    (push-scope state)
-                    (lambda (v s)
-                        (return v (pop-scope s)))
-                    (lambda (e s)
-                        (throw e (pop-scope s)))
-                    (lambda (s)
-                        (break (pop-scope s))))]
-
-                                    
 
             ;; If and while
             [(eq? 'if (caar parseTree))
@@ -206,3 +143,56 @@
                     update-state-from-parse-tree)
             (update-state-from-parse-tree
                     (cadar parseTree) state))))
+
+(define execute-try-return-new-state
+    (lambda (parseTree baseState baseReturn baseThrow baseBreak)
+        ((lambda (doFinally)
+            ((lambda (doCatch)
+                (doFinally (cadr
+                    (execute-parse-tree
+                        (cadar parseTree)
+                        (push-scope baseState)
+                        (lambda (v s)
+                            (baseReturn
+                                v
+                                (doFinally (pop-scope s))))
+                        (lambda (e s)
+                            (doCatch e (pop-scope s)))
+                        (if (null? baseBreak)
+                            '()
+                            (lambda (s)
+                                (baseBreak
+                                    (doFinally (pop-scope s)))))))))
+                (lambda (exception preCatchState)
+                    (doFinally
+                        (if (null? (caddar parseTree))
+                            preCatchState
+                            (cadr
+                                (execute-parse-tree
+                                    (cddr (caddar parseTree))
+                                    (set-var-value
+                                        (caadr (caddar parseTree))
+                                        exception
+                                        (add-var-to-state
+                                            (caadr (caddar parseTree))
+                                            (push-scope preCatchState)))
+                                    (lambda (v s)
+                                        (baseReturn
+                                            v
+                                            (doFinally (pop-scope s))))
+                                    (lambda (e s)
+                                        (baseThrow
+                                            e
+                                            (doFinally (pop-scope s))))
+                                    (if (null? baseBreak)
+                                        '()
+                                        (lambda (s)
+                                            (baseBreak
+                                                (doFinally (pop-scope s))))))))))))
+            (lambda (preFinallyState)
+                (if (null? (car (cdddar parseTree)))
+                    preFinallyState
+                    (cadr (execute-parse-tree
+                        (cdar (cdddar parseTree))
+                        preFinallyState
+                        baseReturn baseThrow baseBreak)))))))
