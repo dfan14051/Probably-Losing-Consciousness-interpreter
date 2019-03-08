@@ -148,51 +148,51 @@
     (lambda (parseTree baseState baseReturn baseThrow baseBreak)
         ((lambda (doFinally)
             ((lambda (doCatch)
-                (doFinally (cadr
+                 (call/cc (lambda (k) (doFinally (cadr
                     (execute-parse-tree
                         (cadar parseTree)
                         (push-scope baseState)
                         (lambda (v s)
-                            (baseReturn
+                            (k (baseReturn
                                 v
-                                (doFinally (pop-scope s))))
+                                (doFinally (pop-scope s)))))
                         (lambda (e s)
-                            (doCatch e (pop-scope s)))
+                            (k
+                                (doFinally (cadr
+                                    (doCatch e (pop-scope s))))))
                         (if (null? baseBreak)
                             '()
                             (lambda (s)
-                                (baseBreak
-                                    (doFinally (pop-scope s)))))))))
+                                (k (baseBreak
+                                    (doFinally (pop-scope s))))))))))))
                 (lambda (exception preCatchState)
-                    (doFinally
-                        (if (null? (caddar parseTree))
-                            preCatchState
-                            (cadr
-                                (execute-parse-tree
-                                    (cddr (caddar parseTree))
-                                    (set-var-value
-                                        (caadr (caddar parseTree))
-                                        exception
-                                        (add-var-to-state
-                                            (caadr (caddar parseTree))
-                                            (push-scope preCatchState)))
-                                    (lambda (v s)
-                                        (baseReturn
-                                            v
-                                            (doFinally (pop-scope s))))
-                                    (lambda (e s)
-                                        (baseThrow
-                                            e
-                                            (doFinally (pop-scope s))))
-                                    (if (null? baseBreak)
-                                        '()
-                                        (lambda (s)
-                                            (baseBreak
-                                                (doFinally (pop-scope s))))))))))))
+                    (if (null? (caddar parseTree))
+                        (list '() preCatchState)
+                        (call/cc (lambda (k) (execute-parse-tree
+                            (caddr (caddar parseTree))
+                            (set-var-value
+                                (caadr (caddar parseTree))
+                                exception
+                                (add-var-to-state
+                                    (caadr (caddar parseTree))
+                                    (push-scope preCatchState)))
+                            (lambda (v s)
+                                (k (baseReturn
+                                    v
+                                    (doFinally (pop-scope s)))))
+                            (lambda (e s)
+                                (k (baseThrow
+                                    e
+                                    (doFinally (pop-scope s)))))
+                            (if (null? baseBreak)
+                                '()
+                                (lambda (s)
+                                    (k (baseBreak
+                                        (doFinally (pop-scope s)))))))))))))
             (lambda (preFinallyState)
                 (if (null? (car (cdddar parseTree)))
                     preFinallyState
                     (cadr (execute-parse-tree
-                        (cdar (cdddar parseTree))
+                        (cadar (cdddar parseTree))
                         preFinallyState
                         baseReturn baseThrow baseBreak)))))))

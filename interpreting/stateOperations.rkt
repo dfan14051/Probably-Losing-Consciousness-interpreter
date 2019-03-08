@@ -46,7 +46,6 @@
     ; param varValue is the value to give the variable
     ; param state is the state to use
     (lambda (varName varValue state)
-        (displayln state)
         (cond
             [(null? state)
                 (error 
@@ -79,7 +78,6 @@
     ; param varName The variable name
     ; param state The state to find the variable's value in
     (lambda (varName state)
-        (displayln state)
         (cond
             [(null? state)
                 (error 
@@ -129,7 +127,6 @@
 
 (define does-var-exist-in-cur-scope?
     (lambda (varName scopeState)
-        (display 'does-var-exist-in-cur-scope?) (display varName) (displayln scopeState)
         (cond
             [(or (null? scopeState) (null? (car scopeState)))
                 #f]
