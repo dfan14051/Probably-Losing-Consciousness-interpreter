@@ -9,15 +9,17 @@
     "stateOperations.rkt")
 
 (provide
-    evaluate-parse-tree)
+    evaluate-parse-tree
+    evaluate-list-of-values)
 
 ;; Evaluates a list of commands
 ;; Returns the resulting value
 (define evaluate-parse-tree
-    ; param command The parse tree to execute
+    ; param command The parse tree to evaluate
     ; param state The state to use
     ; param update-state-from-parse-tree The function to call for updating state
-    (lambda (command state update-state-from-parse-tree)
+    ; param execute-parse-tree The function to call for executing a parse tree, such as a function body
+    (lambda (command state update-state-from-parse-tree execute-parse-tree throw)
         (cond
             ;;;; BASE CASES
             [(null? command)
@@ -35,107 +37,157 @@
                 (*
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))]
             [(eq? '/ (car command))
                 (quotient
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))]
             [(eq? '% (car command))
                 (remainder
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))]
             [(eq? '+ (car command))
                 (+
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))]
             [(eq? '- (car command))
                 (if (null? (cddr command))
                     (* -1 
                         (evaluate-left-side
                         command state
-                        update-state-from-parse-tree))
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))
                     (-
                         (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                         (evaluate-right-side
                         command state
-                        update-state-from-parse-tree)))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)))]
 
             ;;;; COMPARISONS
             [(eq? '== (car command))
                 (boolean-value (eq?
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree)))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)))]
             [(eq? '!= (car command))
                 (boolean-value (not (eq?
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree))))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))))]
             [(eq? '< (car command))
                 (boolean-value (<
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree)))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)))]
             [(eq? '> (car command))
                 (boolean-value (>
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree)))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)))]
             [(eq? '<= (car command))
                 (boolean-value (<=
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree)))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)))]
             [(eq? '>= (car command))
                 (boolean-value (>=
                     (evaluate-left-side
                         command state
-                        update-state-from-parse-tree)
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)
                     (evaluate-right-side
                         command state
-                        update-state-from-parse-tree)))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)))]
 
             ;;;; BOOLEAN OPERATORS
             [(eq? '&& (car command))
                 (boolean-value (and
                     (eq? 'true (evaluate-left-side
                         command state
-                        update-state-from-parse-tree))
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))
                     (eq? 'true (evaluate-right-side
                         command state
-                        update-state-from-parse-tree))))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))))]
             [(eq? '|| (car command))
                 (boolean-value (or
                     (eq? 'true (evaluate-left-side
@@ -143,19 +195,39 @@
                         update-state-from-parse-tree))
                     (eq? 'true (evaluate-right-side
                         command state
-                        update-state-from-parse-tree))))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))))]
             [(eq? '! (car command))
                 (boolean-value (not
                     (eq? 'true (evaluate-left-side
                         command state
-                        update-state-from-parse-tree))))]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw))))]
 
             ;;;; COMMANDS THAT CAN PRODUCE VALUES
             [(eq? '= (car command))
                 ;; Just get the value, ignore the assignment
                 (evaluate-right-side
                         command state
-                        update-state-from-parse-tree)]
+                        update-state-from-parse-tree
+                        execute-parse-tree
+                        throw)]
+
+            ;;;; FUNCTION CALL
+            [(eq? 'funcall (car command))
+                ((lambda (funcData)
+                    (call/cc (lambda (k)
+                        (cadr (execute-parse-tree
+                            (cadr funcData)
+                            ((caddr funcData)
+                                (cddr command) ; the arg list
+                                state)
+                            (lambda (v s)
+                                (k v))
+                            identity)))))
+                    (get-var-value (cadr command) state))]
 
             ;;;; FALLBACK
             [else
@@ -164,20 +236,54 @@
                     "unknown command element"
                     (format "Did not recognize operation ~a" (car command)))])))
 
+(define evaluate-list-of-values
+    ; param command The parse trees to evaluate
+    ; param state The state to use
+    ; param update-state-from-parse-tree The function to call for updating state
+    ; param execute-parse-tree The function to call for executing a parse tree, such as a function body
+    (lambda (commands state update-state-from-parse-tree execute-parse-tree throw)
+        (define evaluate-list-acc
+            (lambda (commandsLeft state acc)
+                (if (null? commandsLeft)
+                    acc
+                    (evaluate-list-acc
+                        (cdr commandsLeft)
+                        (update-state-from-parse-tree
+                            (car commandsLeft)
+                            state
+                            execute-parse-tree
+                            throw)
+                        (cons
+                            (evaluate-parse-tree
+                                (car commandsLeft)
+                                state
+                                update-state-from-parse-tree
+                                execute-parse-tree
+                                throw)
+                            acc)))))
+        (evaluate-list-acc commands state '())))
+
 ;;;; HELPER FUNCTIONS
 (define evaluate-left-side
-    (lambda (command state update-state-from-parse-tree)
+    (lambda (command state update-state-from-parse-tree execute-parse-tree throw)
         (evaluate-parse-tree
             (cadr command) state
-            update-state-from-parse-tree)))
+            update-state-from-parse-tree
+            execute-parse-tree
+            throw)))
 
 (define evaluate-right-side
-    (lambda (command state update-state-from-parse-tree)
+    (lambda (command state update-state-from-parse-tree execute-parse-tree throw)
         (evaluate-parse-tree
             (caddr command)
             (update-state-from-parse-tree
-                (cadr command) state)
-            update-state-from-parse-tree)))
+                (cadr command)
+                state
+                execute-parse-tree
+                throw)
+            update-state-from-parse-tree
+            execute-parse-tree
+            throw)))
 
 (define boolean-value
     (lambda (isTrue)
