@@ -7,7 +7,7 @@
 ;;;; ***************************************************
 
 (require
-    "../parsing/simpleParser.rkt"
+    "../parsing/functionParser.rkt"
     "stateOperations.rkt"
     "executor.rkt")
 
@@ -21,11 +21,11 @@
         (call/cc
             (lambda (k)
                 (execute-parse-tree
-                (parser filePath)
-                (create-state)
-                (lambda (value state)
-                    (k value))
-                (lambda (exception state)
-                    (error
-                        "Uncaught exception"
-                        exception)))))))
+                    (parser filePath)
+                    (create-state)
+                    (lambda (value state)
+                        (k value))
+                    (lambda (exception state)
+                        (error
+                            "Uncaught exception"
+                            exception)))))))

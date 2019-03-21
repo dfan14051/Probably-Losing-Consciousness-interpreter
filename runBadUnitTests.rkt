@@ -7,7 +7,7 @@
 ;;;; ***************************************************
 
 (require
-    "parsing/simpleParser.rkt"
+    "parsing/functionParser.rkt"
     "interpreting/interpreter.rkt")
 
 (parser "unit_tests/unit_test_06.txt")

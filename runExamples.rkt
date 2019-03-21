@@ -7,8 +7,8 @@
 ;;;; ***************************************************
 
 (require
-    "parsing/simpleParser.rkt"
+    "parsing/functionParser.rkt"
     "interpreting/interpreter.rkt")
 
-(parser "examples/test.txt")
-(interpret "examples/test.txt")
+(parser "examples/functions_example.txt")
+(interpret "examples/functions_example.txt")
