@@ -243,19 +243,19 @@
     ; param execute-parse-tree The function to call for executing a parse tree, such as a function body
     (lambda (commands state update-state-from-parse-tree execute-parse-tree throw)
         (define evaluate-list-acc
-            (lambda (commandsLeft state acc)
-                (if (null? commandsLeft)
+            (lambda (remainingCommands state acc)
+                (if (null? remainingCommands)
                     acc
                     (evaluate-list-acc
-                        (cdr commandsLeft)
+                        (cdr remainingCommands)
                         (update-state-from-parse-tree
-                            (car commandsLeft)
+                            (car remainingCommands)
                             state
                             execute-parse-tree
                             throw)
                         (cons
                             (evaluate-parse-tree
-                                (car commandsLeft)
+                                (car remainingCommands)
                                 state
                                 update-state-from-parse-tree
                                 execute-parse-tree
