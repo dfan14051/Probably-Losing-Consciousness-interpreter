@@ -78,7 +78,7 @@
                                     execute-parse-tree
                                     throw))
                             (lambda (v s)
-                                (k s))
+                                (k (leave-function-environment s)))
                             throw))))))
                     (get-var-value (cadr statement) state))]
 

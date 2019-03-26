@@ -7,11 +7,11 @@
 ;;;; ***************************************************
 
 (require
-    "stateOperations.rkt"
-    "evaluator.rkt")
+    "stateOperations.rkt")
 
 (provide
-    create-function-data)
+    create-function-data
+    leave-function-environment)
 
 ;; Creates the function data required to add a function to the state
 (define create-function-data
@@ -28,6 +28,8 @@
                         (push-scope state)))))
             (caddr command)
             (cadddr command))))
+
+(define leave-function-environment pop-scope)
 
 ;;;; HELPER FUNCTIONS
 (define add-args-to-scope
