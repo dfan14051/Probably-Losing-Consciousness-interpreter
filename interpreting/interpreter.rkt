@@ -21,9 +21,8 @@
         ((lambda (parseTree)
             (call/cc
                 (lambda (k)
-                    (displayln (append parseTree '((funcall main))))
                     (execute-parse-tree
-                        (append parseTree '((funcall main)))
+                        (append parseTree '((return (funcall main))))
                         (create-state)
                         (lambda (value state)
                             (k value))

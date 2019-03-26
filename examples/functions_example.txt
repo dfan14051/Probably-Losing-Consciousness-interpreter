@@ -1,11 +1,9 @@
-var x = 0;
-function factorial (x, n) {
-  x = x + 1;
+function factorial (x) {
   if (x == 0)
     return 1;
   else
-    return x * factorial(x - 1, n);
+    return x * factorial(x - 1);
 }
 function main () {
-  return factorial(x = x - 1, 2);
+  return factorial(3);
 }

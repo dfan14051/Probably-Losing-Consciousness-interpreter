@@ -62,13 +62,14 @@
             [(eq? 'funcall (car statement))
                 ((lambda (funcData)
                     (call/cc (lambda (k)
-                        (cadr (execute-parse-tree
+                        (pop-scope (cadr (execute-parse-tree
                             (cadr funcData)
                             ((caddr funcData)
                                 (evaluate-list-of-values ; the arg list
                                     (cddr statement)
                                     state
                                     update-state-from-parse-tree
+                                    update-state-from-command-list
                                     execute-parse-tree
                                     throw)
                                 (update-state-from-command-list
@@ -78,7 +79,7 @@
                                     throw))
                             (lambda (v s)
                                 (k s))
-                            throw)))))
+                            throw))))))
                     (get-var-value (cadr statement) state))]
 
             ;;;; VALUE OPERATIONS THAT CAN AFFECT STATE
@@ -219,6 +220,7 @@
                     (caddr command)
                     state
                     update-state-from-parse-tree
+                    update-state-from-command-list
                     execute-parse-tree
                     throw)
                 (add-var-to-state
@@ -242,6 +244,7 @@
                 (caddr command)
                 state
                 update-state-from-parse-tree
+                update-state-from-command-list
                 execute-parse-tree
                 throw)
             (update-state-from-parse-tree

@@ -43,6 +43,7 @@
                         (cadar parseTree)
                         state
                         update-state-from-parse-tree
+                        update-state-from-command-list
                         execute-parse-tree
                         throw) 
                     (update-state-from-parse-tree 
@@ -56,6 +57,7 @@
                         (cadar parseTree)
                         state
                         update-state-from-parse-tree
+                        update-state-from-command-list
                         execute-parse-tree
                         throw) 
                     (update-state-from-parse-tree 
@@ -136,6 +138,7 @@
                 (cadar parseTree)
                 state
                 update-state-from-parse-tree
+                update-state-from-command-list
                 execute-parse-tree
                 throw)
             (update-state-from-parse-tree
@@ -161,6 +164,7 @@
                     (cadar parseTree)
                     state
                     update-state-from-parse-tree
+                    update-state-from-command-list
                     execute-parse-tree
                     throw)
             (update-state-from-parse-tree
