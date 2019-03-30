@@ -14,11 +14,15 @@
     load-global-state-from-parse-tree)
 
 (define load-global-state-from-parse-tree
-    (lambda (parseTree state)
+    (lambda (parseTree state execute-parse-tree throw)
         (if (null? parseTree)
             state 
             (load-global-state-from-parse-tree
                 (cdr parseTree)
                 (update-state-from-parse-tree
                     (car parseTree)
-                    state)))))
+                    state
+                    execute-parse-tree
+                    throw)
+                execute-parse-tree
+                throw))))

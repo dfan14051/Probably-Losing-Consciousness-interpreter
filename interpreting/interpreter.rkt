@@ -9,7 +9,8 @@
 (require
     "../parsing/functionParser.rkt"
     "stateOperations.rkt"
-    "executor.rkt")
+    "executor.rkt"
+    "loader.rkt")
 
 (provide
     interpret)
@@ -22,12 +23,21 @@
             (call/cc
                 (lambda (k)
                     (execute-parse-tree
-                        (append parseTree '((return (funcall main))))
-                        (create-state)
+                        '((return (funcall main)))
+                        (load-global-state-from-parse-tree
+                            parseTree
+                            (create-state)
+                            execute-parse-tree
+                            base-throw)
                         (lambda (value state)
                             (k value))
-                        (lambda (exception state)
+                        base-throw
+                        ))))
+            (parser filePath))))
+
+;;;; Helper Functions
+(define base-throw
+    (lambda (exception state)
                             (error
                                 "Uncaught exception"
-                                exception))))))
-            (parser filePath))))
+                                exception)))

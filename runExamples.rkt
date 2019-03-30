@@ -10,5 +10,8 @@
     "parsing/functionParser.rkt"
     "interpreting/interpreter.rkt")
 
-(parser "examples/functions_example.txt")
-(interpret "examples/functions_example.txt")
+;(parser "examples/functions_example.txt")
+;(interpret "examples/functions_example.txt")
+
+(parser "unit_tests/part3/unit_test07.txt")
+(interpret "unit_tests/part3/unit_test07.txt")

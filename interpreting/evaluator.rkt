@@ -219,7 +219,10 @@
                 (boolean-value (or
                     (eq? 'true (evaluate-left-side
                         command state
-                        update-state-from-parse-tree))
+                        update-state-from-parse-tree
+                        update-state-from-command-list
+                        execute-parse-tree
+                        throw))
                     (eq? 'true (evaluate-right-side
                         command state
                         update-state-from-parse-tree
