@@ -4,6 +4,7 @@ function factorial (x) {
   else
     return x * factorial(x - 1);
 }
+
 function main () {
   return factorial(3);
 }

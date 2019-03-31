@@ -24,11 +24,11 @@
                 (lambda (k)
                     (execute-parse-tree
                         '((return (funcall main)))
-                        (load-global-state-from-parse-tree
+                        (push-scope (load-global-state-from-parse-tree
                             parseTree
                             (create-state)
                             execute-parse-tree
-                            base-throw)
+                            base-throw))
                         (lambda (value state)
                             (k value))
                         base-throw
@@ -38,6 +38,6 @@
 ;;;; Helper Functions
 (define base-throw
     (lambda (exception state)
-                            (error
-                                "Uncaught exception"
-                                exception)))
+        (error
+            "Uncaught exception"
+            exception)))

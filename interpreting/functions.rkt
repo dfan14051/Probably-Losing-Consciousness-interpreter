@@ -16,16 +16,17 @@
 ;; Creates the function data required to add a function to the state
 (define create-function-data
     ;; param command The command that declares the function
-    (lambda (command)
+    (lambda (command outerEnvironment)
         ((lambda (paramList bodyParseTree)
             (list
                 paramList
                 bodyParseTree
                 (lambda (argList state)
+                    ;(displayln outerEnvironment)
                     (add-args-to-scope
                         paramList
                         argList
-                        (push-scope state)))))
+                        (push-scope outerEnvironment)))))
             (caddr command)
             (cadddr command))))
 

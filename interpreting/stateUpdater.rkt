@@ -258,10 +258,13 @@
     ; param command The command to execute
     ; param state The current state
     (lambda (command state)
+        (displayln state)
         ((lambda (funcName)
             (set-var-value
                 funcName
-                (create-function-data command)
+                (create-function-data
+                    command
+                    state)
                 (add-var-to-state
                     funcName
                     state)))

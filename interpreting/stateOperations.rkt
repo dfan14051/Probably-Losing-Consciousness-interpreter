@@ -25,7 +25,7 @@
     ;;   )
     ;; This allows for easily pushing and popping scopes as necessary
     (lambda ()
-        '((() ()))))
+        (list (box '(() ())))))
 
 ;; Creates a new state that has the new variable added to the front
 (define add-var-to-state
@@ -36,9 +36,13 @@
             (error
                 "variable already initialized"
                 (format "Variable ~a already exists in current scope" varName))
-            (cons
-                (list (cons varName (caar state)) (cons '() (cadar state)))
-                (cdr state)))))
+            (begin
+                (set-box!
+                    (car state)
+                    (list
+                        (cons varName (car (get-current-scope-state state)))
+                        (cons '() (cadr (get-current-scope-state state)))))
+                state))))
 
 ;; Creates a new state that has the variable with the correct value
 (define set-var-value
@@ -58,20 +62,15 @@
                         varName
                         varValue
                         (pop-scope state)))]
-            [(eq? (caaar state) varName)
-                (cons
-                    (cons (caar state) (cons (cons varValue (cdadar state)) '()))
-                    (cdr state))]
             [else
-                ((lambda (newState)
-                    (if (null? (cdar state))
-                        (cons (car state) newState)
-                        (cons
-                            (cons
-                                (cons (caaar state) (caar newState))
-                                (cons (cons (caadar state) (cadar newState)) '()))
-                            (cdr newState))))
-                    (set-var-value varName varValue (go-to-next-var-in-state state)))])))
+                (begin
+                    (set-box!
+                        (car state)
+                        (set-var-value-in-scope-state
+                            (get-current-scope-state state)
+                            varName
+                            varValue))
+                    state)])))
 
 ;; Gets a value given a variable name
 (define get-var-value
@@ -85,8 +84,8 @@
                     (format "No variable named ~a, cannot get value" varName))]
             [(not (does-var-exist-in-cur-scope? varName (get-current-scope-state state)))
                 (get-var-value varName (pop-scope state))]
-            [(eq? (caaar state) varName)
-                (caadar state)]
+            [(eq? (caar (get-current-scope-state state)) varName)
+                (caadr (get-current-scope-state state))]
             [else
                 (get-var-value varName (go-to-next-var-in-state state))])))
 
@@ -123,7 +122,7 @@
 ;;;; ***************************************************
 (define get-current-scope-state
     (lambda (state)
-        (car state)))
+        (unbox (car state))))
 
 (define does-var-exist-in-cur-scope?
     (lambda (varName scopeState)
@@ -133,7 +132,9 @@
             [(eq? (caar scopeState) varName)
                 #t]
             [else
-                (does-var-exist-in-cur-scope? varName (go-to-next-var-in-scope scopeState))])))
+                (does-var-exist-in-cur-scope?
+                    varName
+                    (go-to-next-var-in-scope scopeState))])))
 
 (define go-to-next-var-in-scope
     (lambda (scopeState)
@@ -148,3 +149,18 @@
             (cons
                 (go-to-next-var-in-scope (get-current-scope-state state))
                 (cdr state)))))
+
+(define set-var-value-in-scope-state
+    (lambda (varName varValue scopeState)
+        (if (eq? (caar scopeState) varName)
+            (list
+                (car scopeState)
+                (cons varValue (cdadr scopeState)))
+            ((lambda (newScopeState)
+                (list
+                    (cons (caar scopeState) (car newScopeState))
+                    (cons (caadr scopeState) (cadr newScopeState))))
+                (set-var-value-in-scope-state
+                    varName
+                    varValue
+                    (go-to-next-var-in-scope scopeState))))))
