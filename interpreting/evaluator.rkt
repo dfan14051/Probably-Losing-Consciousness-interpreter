@@ -267,7 +267,7 @@
                                     state
                                     execute-parse-tree
                                     throw))
-                            (lambda (v s)
+                            (lambda (v)
                                 (k v))
                             identity)))))
                     (get-var-value (cadr command) state))]

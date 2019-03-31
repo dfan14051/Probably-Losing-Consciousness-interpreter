@@ -35,6 +35,19 @@
                             (lambda (s)
                                 (break (pop-scope s))))))
                     return throw break)]
+            [(eq? 'funcall (caar parseTree))
+                ((lambda (result)
+                    (execute-parse-tree
+                        (cdr parseTree)
+                        state
+                        return throw break))
+                    (evaluate-parse-tree
+                        (car parseTree)
+                        state
+                        update-state-from-parse-tree
+                        update-state-from-command-list
+                        execute-parse-tree
+                        throw))]
 
             ;; Return, throw, break, continue
             [(eq? 'return (caar parseTree))
@@ -45,11 +58,6 @@
                         update-state-from-parse-tree
                         update-state-from-command-list
                         execute-parse-tree
-                        throw) 
-                    (update-state-from-parse-tree 
-                        (cadar parseTree)
-                        state
-                        execute-parse-tree
                         throw))]
             [(eq? 'throw (caar parseTree))
                 (throw
@@ -59,24 +67,19 @@
                         update-state-from-parse-tree
                         update-state-from-command-list
                         execute-parse-tree
-                        throw) 
-                    (update-state-from-parse-tree 
-                        (cadar parseTree)
-                        state
-                        execute-parse-tree
                         throw))]
             [(eq? 'break (caar parseTree))
                 (if (null? break)
                     (error
                         "illegal break"
                         "Cannot break when not in a loop")
-                    (break state))]
+                    (break))]
             [(eq? 'continue (caar parseTree))
                 (if (null? break)
                     (error
                         "illegal continue"
                         "Cannot continue when not in a loop")
-                    (list '() state))]
+                    (list '()))]
 
             ;; Try-catch-finally
             [(eq? 'try (caar parseTree))

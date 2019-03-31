@@ -10,5 +10,5 @@
     "parsing/functionParser.rkt"
     "interpreting/interpreter.rkt")
 
-(parser "unit_tests/part3/unit_test_16.txt")
-(interpret "unit_tests/part3/unit_test_16.txt")
+(parser "unit_tests/part3/unit_test_11.txt")
+(interpret "unit_tests/part3/unit_test_11.txt")
