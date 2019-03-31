@@ -22,7 +22,6 @@
                 paramList
                 bodyParseTree
                 (lambda (argList state)
-                    ;(displayln outerEnvironment)
                     (add-args-to-scope
                         paramList
                         argList
@@ -35,6 +34,8 @@
 ;;;; HELPER FUNCTIONS
 (define add-args-to-scope
     (lambda (paramList argList state)
+        ;(display 'params:) (displayln paramList)
+        ;(display 'args:) (displayln argList)
         (if (null? paramList)
             state
             (add-args-to-scope

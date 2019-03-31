@@ -84,16 +84,16 @@
                     (format "No variable named ~a, cannot get value" varName))]
             [(not (does-var-exist-in-cur-scope? varName (get-current-scope-state state)))
                 (get-var-value varName (pop-scope state))]
-            [(eq? (caar (get-current-scope-state state)) varName)
-                (caadr (get-current-scope-state state))]
             [else
-                (get-var-value varName (go-to-next-var-in-state state))])))
+                (get-var-value-in-scope-state
+                    varName
+                    (get-current-scope-state state))])))
 
 ;; Adds a new layer for a new scope to a state
 (define push-scope
     ; param state The state to add a scope to
     (lambda (state)
-        (cons '(() ()) state)))
+        (cons (box '(() ())) state)))
 
 ;; Removes the top layer of scope from a state
 (define pop-scope
@@ -144,7 +144,7 @@
 
 (define go-to-next-var-in-state
     (lambda (state)
-        (if (null? (cdar state))
+        (if (null? (cdr (get-current-scope-state state)))
             (pop-scope state)
             (cons
                 (go-to-next-var-in-scope (get-current-scope-state state))
@@ -152,8 +152,6 @@
 
 (define set-var-value-in-scope-state
     (lambda (varName varValue scopeState)
-        (display 'varname:) (displayln varName)
-        (display 'scopeState: ) (displayln scopeState)
         (if (eq? (caar scopeState) varName)
             (list
                 (car scopeState)
@@ -166,3 +164,9 @@
                     varName
                     varValue
                     (go-to-next-var-in-scope scopeState))))))
+
+(define get-var-value-in-scope-state
+    (lambda (varName scopeState)
+        (if (eq? (caar scopeState) varName)
+            (caadr scopeState)
+            (get-var-value-in-scope-state varName (go-to-next-var-in-scope scopeState)))))
