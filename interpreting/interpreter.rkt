@@ -29,7 +29,7 @@
                             (create-state)
                             execute-parse-tree
                             base-throw))
-                        (lambda (value state)
+                        (lambda (value)
                             (k value))
                         base-throw
                         ))))
@@ -37,7 +37,7 @@
 
 ;;;; Helper Functions
 (define base-throw
-    (lambda (exception state)
+    (lambda (exception)
         (error
             "Uncaught exception"
             exception)))
