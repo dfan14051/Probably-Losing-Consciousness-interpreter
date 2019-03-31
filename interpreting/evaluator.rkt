@@ -269,7 +269,7 @@
                                     throw))
                             (lambda (v)
                                 (k v))
-                            identity)))))
+                            throw)))))
                     (get-var-value (cadr command) state))]
 
             ;;;; FALLBACK

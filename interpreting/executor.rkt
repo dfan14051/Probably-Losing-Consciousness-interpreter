@@ -28,12 +28,7 @@
                         (execute-parse-tree
                             (cdar parseTree)
                             (push-scope state)
-                            (lambda (v s)
-                                (return v (pop-scope s)))
-                            (lambda (e s)
-                                (throw e (pop-scope s)))
-                            (lambda (s)
-                                (break (pop-scope s))))))
+                            return throw break)))
                     return throw break)]
             [(eq? 'funcall (caar parseTree))
                 ((lambda (result)
@@ -184,22 +179,22 @@
                     (execute-parse-tree
                         (cadar parseTree)
                         (push-scope baseState)
-                        (lambda (v s)
+                        (lambda (v)
                             (k (baseReturn
                                 v
-                                (doFinally (pop-scope s)))))
-                        (lambda (e s)
+                                (doFinally))))
+                        (lambda (e)
                             (k
                                 (doFinally (cadr
-                                    (doCatch e (pop-scope s))))))
+                                    (doCatch e)))))
                         (if (null? baseBreak)
                             '()
-                            (lambda (s)
+                            (lambda ()
                                 (k (baseBreak
-                                    (doFinally (pop-scope s))))))))))))
-                (lambda (exception preCatchState)
+                                    (doFinally)))))))))))
+                (lambda (exception)
                     (if (null? (caddar parseTree))
-                        (list '() preCatchState)
+                        '()
                         (call/cc (lambda (k) (execute-parse-tree
                             (caddr (caddar parseTree))
                             (set-var-value
@@ -207,20 +202,17 @@
                                 exception
                                 (add-var-to-state
                                     (caadr (caddar parseTree))
-                                    (push-scope preCatchState)))
-                            (lambda (v s)
+                                    (push-scope baseState)))
+                            (lambda (v)
                                 (k (baseReturn
-                                    v
-                                    (doFinally (pop-scope s)))))
-                            (lambda (e s)
+                                    v)))
+                            (lambda (e)
                                 (k (baseThrow
-                                    e
-                                    (doFinally (pop-scope s)))))
+                                    e)))
                             (if (null? baseBreak)
                                 '()
                                 (lambda (s)
-                                    (k (baseBreak
-                                        (doFinally (pop-scope s)))))))))))))
+                                    (k (baseBreak)))))))))))
             (lambda (preFinallyState)
                 (if (null? (car (cdddar parseTree)))
                     preFinallyState
