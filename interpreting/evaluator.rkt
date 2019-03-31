@@ -298,15 +298,15 @@
                             state
                             execute-parse-tree
                             throw)
-                        (cons
-                            (evaluate-parse-tree
+                        (append
+                            acc
+                            (list (evaluate-parse-tree
                                 (car remainingCommands)
                                 state
                                 update-state-from-parse-tree
                                 update-state-from-command-list
                                 execute-parse-tree
-                                throw)
-                            acc)))))
+                                throw)))))))
         (evaluate-list-acc commands state '())))
 
 ;;;; HELPER FUNCTIONS

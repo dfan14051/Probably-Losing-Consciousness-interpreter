@@ -78,7 +78,7 @@
                                     execute-parse-tree
                                     throw))
                             (lambda (v s)
-                                (k (leave-function-environment s)))
+                                (k state))
                             throw))))))
                     (get-var-value (cadr statement) state))]
 
@@ -258,7 +258,6 @@
     ; param command The command to execute
     ; param state The current state
     (lambda (command state)
-        (displayln state)
         ((lambda (funcName)
             (set-var-value
                 funcName
