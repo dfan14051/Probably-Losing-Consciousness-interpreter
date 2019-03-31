@@ -28,43 +28,53 @@
                         (execute-parse-tree
                             (cdar parseTree)
                             (push-scope state)
-                            (lambda (v s)
-                                (return v (pop-scope s)))
-                            (lambda (e s)
-                                (throw e (pop-scope s)))
-                            (lambda (s)
-                                (break (pop-scope s))))))
+                            return throw break)))
                     return throw break)]
+            [(eq? 'funcall (caar parseTree))
+                ((lambda (result)
+                    (execute-parse-tree
+                        (cdr parseTree)
+                        state
+                        return throw break))
+                    (evaluate-parse-tree
+                        (car parseTree)
+                        state
+                        update-state-from-parse-tree
+                        update-state-from-command-list
+                        execute-parse-tree
+                        throw))]
 
             ;; Return, throw, break, continue
             [(eq? 'return (caar parseTree))
                 (return 
                     (evaluate-parse-tree 
-                        (cadar parseTree) state
-                        update-state-from-parse-tree) 
-                    (update-state-from-parse-tree 
                         (cadar parseTree)
-                        state))]
+                        state
+                        update-state-from-parse-tree
+                        update-state-from-command-list
+                        execute-parse-tree
+                        throw))]
             [(eq? 'throw (caar parseTree))
                 (throw
                     (evaluate-parse-tree 
-                        (cadar parseTree) state
-                        update-state-from-parse-tree) 
-                    (update-state-from-parse-tree 
                         (cadar parseTree)
-                        state))]
+                        state
+                        update-state-from-parse-tree
+                        update-state-from-command-list
+                        execute-parse-tree
+                        throw))]
             [(eq? 'break (caar parseTree))
                 (if (null? break)
                     (error
                         "illegal break"
                         "Cannot break when not in a loop")
-                    (break state))]
+                    (break))]
             [(eq? 'continue (caar parseTree))
                 (if (null? break)
                     (error
                         "illegal continue"
                         "Cannot continue when not in a loop")
-                    (list '() state))]
+                    (list '()))]
 
             ;; Try-catch-finally
             [(eq? 'try (caar parseTree))
@@ -99,7 +109,9 @@
                     (cdr parseTree)
                     (update-state-from-parse-tree
                         (car parseTree)
-                        state)
+                        state
+                        execute-parse-tree
+                        throw)
                     return throw break)])))
 
 ;;;; HELPER FUNCTIONS
@@ -121,9 +133,17 @@
                         postConditionState
                         return throw break))]))
             (evaluate-parse-tree
-                (cadar parseTree) state
-                update-state-from-parse-tree)
-            (update-state-from-parse-tree (cadar parseTree) state))))
+                (cadar parseTree)
+                state
+                update-state-from-parse-tree
+                update-state-from-command-list
+                execute-parse-tree
+                throw)
+            (update-state-from-parse-tree
+                (cadar parseTree)
+                state
+                execute-parse-tree
+                throw))))
 
 (define execute-while-return-new-state
     (lambda (parseTree state old-break return throw break)
@@ -139,10 +159,17 @@
                     return throw break)
                 postConditionState))
             (evaluate-parse-tree
-                    (cadar parseTree) state
-                    update-state-from-parse-tree)
+                    (cadar parseTree)
+                    state
+                    update-state-from-parse-tree
+                    update-state-from-command-list
+                    execute-parse-tree
+                    throw)
             (update-state-from-parse-tree
-                    (cadar parseTree) state))))
+                    (cadar parseTree)
+                    state
+                    execute-parse-tree
+                    throw))))
 
 (define execute-try-return-new-state
     (lambda (parseTree baseState baseReturn baseThrow baseBreak)
@@ -152,22 +179,22 @@
                     (execute-parse-tree
                         (cadar parseTree)
                         (push-scope baseState)
-                        (lambda (v s)
+                        (lambda (v)
                             (k (baseReturn
                                 v
-                                (doFinally (pop-scope s)))))
-                        (lambda (e s)
+                                (doFinally))))
+                        (lambda (e)
                             (k
                                 (doFinally (cadr
-                                    (doCatch e (pop-scope s))))))
+                                    (doCatch e)))))
                         (if (null? baseBreak)
                             '()
-                            (lambda (s)
+                            (lambda ()
                                 (k (baseBreak
-                                    (doFinally (pop-scope s))))))))))))
-                (lambda (exception preCatchState)
+                                    (doFinally)))))))))))
+                (lambda (exception)
                     (if (null? (caddar parseTree))
-                        (list '() preCatchState)
+                        '()
                         (call/cc (lambda (k) (execute-parse-tree
                             (caddr (caddar parseTree))
                             (set-var-value
@@ -175,20 +202,17 @@
                                 exception
                                 (add-var-to-state
                                     (caadr (caddar parseTree))
-                                    (push-scope preCatchState)))
-                            (lambda (v s)
+                                    (push-scope baseState)))
+                            (lambda (v)
                                 (k (baseReturn
-                                    v
-                                    (doFinally (pop-scope s)))))
-                            (lambda (e s)
+                                    v)))
+                            (lambda (e)
                                 (k (baseThrow
-                                    e
-                                    (doFinally (pop-scope s)))))
+                                    e)))
                             (if (null? baseBreak)
                                 '()
                                 (lambda (s)
-                                    (k (baseBreak
-                                        (doFinally (pop-scope s)))))))))))))
+                                    (k (baseBreak)))))))))))
             (lambda (preFinallyState)
                 (if (null? (car (cdddar parseTree)))
                     preFinallyState

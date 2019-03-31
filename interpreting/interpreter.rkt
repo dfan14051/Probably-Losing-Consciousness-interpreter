@@ -9,7 +9,8 @@
 (require
     "../parsing/functionParser.rkt"
     "stateOperations.rkt"
-    "executor.rkt")
+    "executor.rkt"
+    "loader.rkt")
 
 (provide
     interpret)
@@ -18,14 +19,25 @@
 (define interpret
     ;; param filePath is the name of the file to interpret
     (lambda (filePath)
-        (call/cc
-            (lambda (k)
-                (execute-parse-tree
-                    (parser filePath)
-                    (create-state)
-                    (lambda (value state)
-                        (k value))
-                    (lambda (exception state)
-                        (error
-                            "Uncaught exception"
-                            exception)))))))
+        ((lambda (parseTree)
+            (call/cc
+                (lambda (k)
+                    (execute-parse-tree
+                        '((return (funcall main)))
+                        (push-scope (load-global-state-from-parse-tree
+                            parseTree
+                            (create-state)
+                            execute-parse-tree
+                            base-throw))
+                        (lambda (value)
+                            (k value))
+                        base-throw
+                        ))))
+            (parser filePath))))
+
+;;;; Helper Functions
+(define base-throw
+    (lambda (exception)
+        (error
+            "Uncaught exception"
+            exception)))

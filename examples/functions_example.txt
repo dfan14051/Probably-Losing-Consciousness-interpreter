@@ -1,4 +1,4 @@
-function factorial (x, n) {
+function factorial (x) {
   if (x == 0)
     return 1;
   else
@@ -6,5 +6,5 @@ function factorial (x, n) {
 }
 
 function main () {
-  return factorial(6);
+  return factorial(3);
 }
