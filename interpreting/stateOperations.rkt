@@ -67,9 +67,9 @@
                     (set-box!
                         (car state)
                         (set-var-value-in-scope-state
-                            (get-current-scope-state state)
                             varName
-                            varValue))
+                            varValue
+                            (get-current-scope-state state)))
                     state)])))
 
 ;; Gets a value given a variable name
@@ -152,6 +152,8 @@
 
 (define set-var-value-in-scope-state
     (lambda (varName varValue scopeState)
+        (display 'varname:) (displayln varName)
+        (display 'scopeState: ) (displayln scopeState)
         (if (eq? (caar scopeState) varName)
             (list
                 (car scopeState)
