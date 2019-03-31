@@ -10,8 +10,7 @@
     "stateOperations.rkt")
 
 (provide
-    create-function-data
-    leave-function-environment)
+    create-function-data)
 
 ;; Creates the function data required to add a function to the state
 (define create-function-data
@@ -29,13 +28,9 @@
             (caddr command)
             (cadddr command))))
 
-(define leave-function-environment pop-scope)
-
 ;;;; HELPER FUNCTIONS
 (define add-args-to-scope
     (lambda (paramList argList state)
-        ;(display 'params:) (displayln paramList)
-        ;(display 'args:) (displayln argList)
         (if (null? paramList)
             state
             (add-args-to-scope

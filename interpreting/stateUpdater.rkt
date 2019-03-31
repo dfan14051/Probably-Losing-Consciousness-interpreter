@@ -58,30 +58,6 @@
                 ;; Continue onwards with the new state
                 (update-state-from-function-declaration statement state)]
 
-            ;;;; FUNCTION CALL
-            [(eq? 'funcall (car statement))
-                ((lambda (funcData)
-                    (call/cc (lambda (k)
-                        (pop-scope (cadr (execute-parse-tree
-                            (cadr funcData)
-                            ((caddr funcData)
-                                (evaluate-list-of-values ; the arg list
-                                    (cddr statement)
-                                    state
-                                    update-state-from-parse-tree
-                                    update-state-from-command-list
-                                    execute-parse-tree
-                                    throw)
-                                (update-state-from-command-list
-                                    (cddr statement)
-                                    state
-                                    execute-parse-tree
-                                    throw))
-                            (lambda (v s)
-                                (k state))
-                            throw))))))
-                    (get-var-value (cadr statement) state))]
-
             ;;;; VALUE OPERATIONS THAT CAN AFFECT STATE
             [(eq? '* (car statement))
                 (update-state-from-binary-operation-sides
