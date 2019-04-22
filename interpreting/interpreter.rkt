@@ -7,7 +7,7 @@
 ;;;; ***************************************************
 
 (require
-    "../parsing/functionParser.rkt"
+    "../parsing/classParser.rkt"
     "stateOperations.rkt"
     "executor.rkt"
     "loader.rkt")
