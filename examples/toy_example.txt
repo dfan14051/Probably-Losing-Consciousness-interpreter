@@ -1,9 +1,37 @@
 class A {
-  var x = 5;
-  var y = 10;
+  var x = 1;
+  var y = 2;
+  var z = 3;
+
+  function addAll() {
+    return this.x + y + z;
+  }
+}
+
+class B extends A {
+  var x = 11;
+  var y = 12;
+  var z = 13;
+
+  function multiplyAll() {
+    return this.x * super.y * z;
+  }
+}
+
+class C extends B {
+  var x = 21;
+  var y = 22;
+  var z = 23;
+
+  function addAndMultiplyAll() {
+    return (this.x + y + z) + (this.x * super.y * z);
+  }
 
   static function main() {
     var a = new A();
-    return a.x + a.y;
+    var b = new B();
+    var c = new C();
+
+    return c.addAll() + c.multiplyAll() + c.addAndMultiplyAll();
   }
 }
