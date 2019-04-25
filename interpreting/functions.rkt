@@ -28,11 +28,11 @@
                         ; Possibly add this and super to the paramList
                         (if isStatic
                             paramList
-                            (cons (list 'this 'super) paramList))
+                            (cons 'this (cons 'super paramList)))
                         ; Possibly add this and super to the argList
                         (if isStatic
                             argList
-                            (cons (list (list (car objectScopeList)) (list (cadr objectScopeList))) argList))
+                            (cons (list (car objectScopeList)) (cons (list (cadr objectScopeList))) argList)))
                         (push-scope (append objectScopeList (list globalScope)))))))
             (caddr command)
             (cadddr command))))
