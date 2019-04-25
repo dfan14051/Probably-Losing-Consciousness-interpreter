@@ -15,22 +15,31 @@
 ;; Creates the function data required to add a function to the state
 (define create-function-data
     ;; param command The command that declares the function
-    (lambda (command outerEnvironment)
+    ;; param globalScope The global scope box
+    ;; param objectScopeList The list of scope boxes for the object
+    ;; param isStatic Whether the function is static
+    (lambda (command globalScope objectScopeList isStatic)
         ((lambda (paramList bodyParseTree)
             (list
                 paramList
                 bodyParseTree
                 (lambda (argList state)
                     (add-args-to-scope
-                        paramList
-                        argList
-                        (push-scope outerEnvironment)))))
+                        ; Possibly add this and super to the paramList
+                        (if isStatic
+                            paramList
+                            (cons (list 'this 'super) paramList))
+                        ; Possibly add this and super to the argList
+                        (if isStatic
+                            argList
+                            (cons (list (list (car objectScopeList)) (list (cadr objectScopeList))) argList))
+                        (push-scope (append objectScopeList (list globalScope)))))))
             (caddr command)
             (cadddr command))))
 
 ;;;; HELPER FUNCTIONS
 (define add-args-to-scope
-    (lambda (paramList argList state)
+    (lambda (paramList argList shouldAddThis state)
         (if (null? paramList)
             state
             (add-args-to-scope
