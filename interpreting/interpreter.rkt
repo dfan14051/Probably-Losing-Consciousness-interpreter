@@ -17,13 +17,14 @@
 
 ;; Given a file path, interprets and executes it.
 (define interpret
-    ;; param filePath is the name of the file to interpret
-    (lambda (filePath)
+    ;; param filePath The name of the file to interpret
+    ;; param mainClassName The name of the class that contains the main method
+    (lambda (filePath mainClassName)
         ((lambda (parseTree)
             (call/cc
                 (lambda (k)
                     (execute-parse-tree
-                        '((return (funcall main)))
+                        '((return (funcall (dot mainClassName main))))
                         (push-scope (load-global-state-from-parse-tree
                             parseTree
                             (create-state)

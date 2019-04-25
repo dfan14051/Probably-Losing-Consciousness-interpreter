@@ -3,24 +3,31 @@
 (require
     "interpreting/interpreter.rkt")
 
+(define test-name caar)
+(define test-main-class-name cadar)
+(define should-test-pass caddar)
+(define expected-test-return-value
+    (lambda (x)
+        (cadddr (car x))))
+
 (define run-unit-test
     (lambda (unitTests testsDir)
         (with-handlers
             ([exn?
                 (lambda (exn)
-                    (if (cadar unitTests)
-                        (writeln (format "~a failed; unexpected exception" (caar unitTests)))
-                        (writeln (format "~a succeeded" (caar unitTests)))))])
+                    (if (should-test-pass unitTests)
+                        (writeln (format "~a failed; unexpected exception" (test-name unitTests)))
+                        (writeln (format "~a succeeded" (test-name unitTests)))))])
             (let
                 ([result
-                    (interpret (format "unit_tests/~a/unit_test_~a.txt" testsDir (caar unitTests)))])
+                    (interpret (format "unit_tests/~a/unit_test_~a.txt" testsDir (test-name unitTests)) (test-main-class-name unitTests))])
                 (cond
                     [(eq? (caddar unitTests) result)
-                        (writeln (format "~a succeeded" (caar unitTests)))]
-                    [(cadar unitTests)
-                        (writeln (format "~a failed; expected ~v, got ~v" (caar unitTests) (caddar unitTests) result))]
+                        (writeln (format "~a succeeded" (test-name unitTests)))]
+                    [(should-test-pass unitTests)
+                        (writeln (format "~a failed; expected ~v, got ~v" (test-name unitTests) (expected-test-return-value unitTests) result))]
                     [else
-                        (writeln (format "~a did not throw when expected to" (caar unitTests)))])))
+                        (writeln (format "~a did not throw when expected to" (test-name unitTests)))])))
         (if (null? (cdr unitTests))
             "Done"
             (run-unit-test (cdr unitTests) testsDir))))
@@ -100,17 +107,17 @@
 ;;; ) 'part3)
 
 (run-unit-test '(
-    ("01" #t 15)
-    ("02" #t 12)
-    ("03" #t 125)
-    ("04" #t 36)
-    ("05" #t 54)
-    ("06" #t 110)
-    ("07" #t 26)
-    ("08" #t 117)
-    ("09" #t 32)
-    ("10" #t 14)
-    ("11" #t 123456)
-    ("12" #t 5285)
-    ("13" #t -716)
+    ("01" "A" #t 15)
+    ("02" "A" #t 12)
+    ("03" "A" #t 125)
+    ("04" "A" #t 36)
+    ("05" "A" #t 54)
+    ("06" "A" #t 110)
+    ("07" "C" #t 26)
+    ("08" "Square" #t 117)
+    ("09" "Square" #t 32)
+    ("10" "List" #t 14)
+    ("11" "List" #t 123456)
+    ("12" "List" #t 5285)
+    ("13" "C" #t -716)
 ) 'part4)

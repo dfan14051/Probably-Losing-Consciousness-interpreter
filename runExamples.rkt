@@ -11,4 +11,4 @@
     "interpreting/interpreter.rkt")
 
 (parser "examples/toy_example.txt")
-(interpret "examples/toy_example.txt")
+(interpret "examples/toy_example.txt" "A")
