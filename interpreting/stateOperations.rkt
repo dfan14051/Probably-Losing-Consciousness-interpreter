@@ -46,48 +46,64 @@
 
 ;; Creates a new state that has the variable with the correct value
 (define set-var-value
-    ; param varName is the name of the variable
+    ; param varExpr is the variable name and expression that follows
     ; param varValue is the value to give the variable
     ; param state is the state to use
-    (lambda (varName varValue state)
+    (lambda (varExpr varValue state)
         (cond
             [(null? state)
                 (error 
                     "variable not initialized"
-                    (format "No variable named ~a, cannot set value" varName))]
-            [(not (does-var-exist-in-cur-scope? varName (get-current-scope-state state)))
+                    (format "No variable named ~a, cannot set value" varExpr))]
+
+            [(and (not (pair? varExpr)) (not (does-var-exist-in-cur-scope? varExpr (get-current-scope-state state))))
                 (cons
                     (car state)
                     (set-var-value
-                        varName
+                        varExpr
                         varValue
                         (pop-scope state)))]
-            [else
+
+            [(not (pair? varExpr))
                 (begin
                     (set-box!
                         (car state)
                         (set-var-value-in-scope-state
-                            varName
+                            varExpr
                             varValue
                             (get-current-scope-state state)))
-                    state)])))
+                    state)]
+
+            [(and (pair? varExpr) (eq? 'dot (car varExpr)))
+                (set-var-value
+                    (caddr varExpr)
+                    varValue
+                    (get-var-value (cadr varExpr) state))]))) ; do thing if both a list and contains .
 
 ;; Gets a value given a variable name
 (define get-var-value
-    ; param varName The variable name
+    ; param varExpr The variable name and expression that follows
     ; param state The state to find the variable's value in
-    (lambda (varName state)
+    (lambda (varExpr state)
         (cond
             [(null? state)
                 (error 
                     "variable not initialized"
-                    (format "No variable named ~a, cannot get value" varName))]
-            [(not (does-var-exist-in-cur-scope? varName (get-current-scope-state state)))
+                      (format "No variable named ~a, cannot get value" varExpr))]
+            
+            [(and (not (pair? varExpr)) (not (does-var-exist-in-cur-scope? varName (get-current-scope-state state))))
                 (get-var-value varName (pop-scope state))]
-            [else
+
+            [(not (pair? varExpr))
                 (get-var-value-in-scope-state
-                    varName
-                    (get-current-scope-state state))])))
+                    varExpr
+                    (get-current-scope-state state))]
+            
+            [(and (pair? varExpr) (eq? 'dot (car varExpr)))
+                (get-var-value
+                    (caddr varExpr) 
+                    (get-var-value (cadr varExpr) state))])))
+
 
 ;; Adds a new layer for a new scope to a state
 (define push-scope
