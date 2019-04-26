@@ -7,6 +7,7 @@
 ;;;; ***************************************************
 (require
     "stateOperations.rkt"
+    "executor.rkt"
     "evaluator.rkt"
     "stateUpdater.rkt")
 
@@ -74,3 +75,32 @@
                     (cdr parseTree)
                     globalState
                     closure)])))
+;;;; HELPER FUNCTIONS
+(define create-constructor-data
+    (lambda (globalScope classBodyParseTree extendsName)
+        (execute-class-body
+            classBodyParseTree
+            (if (null? extendsName)
+                (create-state)
+                (push-scope (evaluate-function
+                    ('dot extendsName 'new)
+                    (create-state)
+                    update-state-from-parse-tree
+                    update-state-from-command-list
+                    execute-parse-tree
+                    (lambda (exception)
+                        (error
+                            "Exception occurred in constructor"
+                            exception))))))))
+
+(define execute-class-body ; Used exclusively for constructors
+    (lambda (remainingClassBodyParseTree objectState throw)
+        (if (null? remainingClassBodyParseTree))
+            objectState
+            (execute-class-body
+                (cdr remainingClassBodyParseTree)
+                (update-state-from-parse-tree
+                    (car remainingClassBodyParseTree)
+                    objectState
+                    execute-parse-tree
+                    throw))))
