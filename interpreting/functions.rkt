@@ -27,6 +27,7 @@
                 paramList
                 bodyParseTree
                 (lambda (argList functionEnvironment)
+                    ;;; (displayln argList)
                     (add-args-to-scope
                         ; Possibly add this and super to the paramList
                         (if isStatic
