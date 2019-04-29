@@ -22,7 +22,7 @@
                 ([result
                     (interpret (format "unit_tests/~a/unit_test_~a.txt" testsDir (test-name unitTests)) (test-main-class-name unitTests))])
                 (cond
-                    [(eq? (caddar unitTests) result)
+                    [(eq? (cadddr (car unitTests)) result)
                         (writeln (format "~a succeeded" (test-name unitTests)))]
                     [(should-test-pass unitTests)
                         (writeln (format "~a failed; expected ~v, got ~v" (test-name unitTests) (expected-test-return-value unitTests) result))]
