@@ -10,7 +10,8 @@
 
 (provide
     evaluate-parse-tree
-    evaluate-list-of-values)
+    evaluate-list-of-values
+    evaluate-function)
 
 ;; Evaluates a list of commands
 ;; Returns the resulting value
@@ -22,6 +23,7 @@
     ; param execute-parse-tree The function to call for executing a parse tree, such as a function body
     ; param throw The function to pass in the case of a function call for throw
     (lambda (command state update-state-from-parse-tree update-state-from-command-list execute-parse-tree throw)
+        ;;; (displayln command)
         (cond
             ;;;; BASE CASES
             [(null? command)
@@ -285,6 +287,27 @@
                     update-state-from-command-list
                     execute-parse-tree
                     throw)]
+            [(eq? 'new (car command))
+                ((get-var-value
+                    'new
+                    (get-var-value (cadr command) state)))]
+
+            ;;;; DOT OPERATOR
+            [(eq? 'dot (car command))
+                ;; It's just getting a value via a dot operator
+                (evaluate-parse-tree
+                    (caddr command)
+                    (evaluate-parse-tree
+                        (cadr command)
+                        state
+                        update-state-from-parse-tree
+                        update-state-from-command-list
+                        execute-parse-tree
+                        throw)
+                    update-state-from-parse-tree
+                    update-state-from-command-list
+                    execute-parse-tree
+                    throw)]
 
             ;;;; FALLBACK
             [else
@@ -345,7 +368,13 @@
                     (lambda (v)
                         (k v))
                     throw)))))
-            (get-var-value (cadr command) state))))
+            (evaluate-parse-tree
+                (cadr command)
+                state
+                update-state-from-parse-tree
+                update-state-from-command-list
+                execute-parse-tree
+                throw))))
 
 ;;;; HELPER FUNCTIONS
 (define evaluate-left-side

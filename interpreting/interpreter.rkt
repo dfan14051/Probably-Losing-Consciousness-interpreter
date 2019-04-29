@@ -24,19 +24,17 @@
             (call/cc
                 (lambda (k)
                     (execute-parse-tree
-                        '((return (funcall (dot mainClassName main))))
-                        (push-scope 
+                        (list (list 'return (list 'funcall (list 'dot mainClassName 'main))))
+                        (push-empty-scope 
                             (load-global-state-from-parse-tree
                                 parseTree
                                 (create-state)
                                 execute-parse-tree
                                 base-throw
-                            )
-                        )
+                            ))
                         (lambda (value)
                             (k value))
-                        base-throw
-                        ))))
+                        base-throw))))
             (parser filePath))))
 
 ;;;; Helper Functions

@@ -15,15 +15,18 @@
 ;; Creates the function data required to add a function to the state
 (define create-function-data
     ;; param command The command that declares the function
-    ;; param globalScope The global scope box
-    ;; param objectScopeList The list of scope boxes for the object
+    ;; param outerFunctionEnvironment The outer function environment
     ;; param isStatic Whether the function is static
-    (lambda (command globalScope objectScopeList isStatic)
-        ((lambda (paramList bodyParseTree)
+    (lambda (command outerFunctionEnvironment isStatic)
+        ;;; (displayln 'CREATING-FUNCTION-DATA)
+        ;;; (displayln command)
+        ;;; (displayln outerFunctionEnvironment)
+        ;;; (displayln isStatic)
+        ((lambda (paramList bodyParseTree this super)
             (list
                 paramList
                 bodyParseTree
-                (lambda (argList state)
+                (lambda (argList functionEnvironment)
                     (add-args-to-scope
                         ; Possibly add this and super to the paramList
                         (if isStatic
@@ -32,14 +35,64 @@
                         ; Possibly add this and super to the argList
                         (if isStatic
                             argList
-                            (cons (list (car objectScopeList)) (cons (list (cadr objectScopeList))) argList)))
-                        (push-scope (append objectScopeList (list globalScope)))))))
-            (caddr command)
-            (cadddr command))))
+                            (cons this (cons super argList)))
+                        (push-empty-scope outerFunctionEnvironment)))))
+            (get-param-list command)
+            (get-function-body command)
+            (create-this outerFunctionEnvironment)
+            (create-super outerFunctionEnvironment))))
 
 ;;;; HELPER FUNCTIONS
+(define get-function-name cadr)
+(define get-param-list caddr)
+(define get-function-body cadddr)
+
+(define create-this
+    (lambda (outerFunctionEnvironment)
+        (if (null? outerFunctionEnvironment)
+            '()
+            (create-state-from-scope (get-current-scope outerFunctionEnvironment)))))
+
+(define create-super
+    (lambda (outerFunctionEnvironment)
+        (if (or (null? outerFunctionEnvironment) (or (null? (cdr outerFunctionEnvironment)) (null? (cddr outerFunctionEnvironment))))
+            '()
+            ((lambda (instance-functions)
+                (push-scope
+                    (car instance-functions)
+                    (cadr instance-functions)
+                    (create-state-from-scope (get-current-scope (pop-scope outerFunctionEnvironment)))))
+                (get-instance-functions-from-outer-function-environment
+                    (pop-scope outerFunctionEnvironment))))))
+
+(define instance_functions_atom '__instance_functions)
+(define class_name_atom '__class_name)
+(define get-instance-functions-from-outer-function-environment
+    (lambda (outerFunctionEnvironment)
+        (get-instance-functions-from-list
+            '()
+            '()
+            (get-var-value
+                instance_functions_atom
+                (get-var-value
+                    (get-var-value class_name_atom outerFunctionEnvironment)
+                    outerFunctionEnvironment))
+            outerFunctionEnvironment)))
+
+(define get-instance-functions-from-list
+    (lambda (functionNames functionValues l outerFunctionEnvironment)
+        (if (null? l)
+            (list functionNames functionValues)
+            (get-instance-functions-from-list
+                (cons (caar l) functionNames)
+                (cons
+                    (create-function-data (cadar l) outerFunctionEnvironment #f)
+                    functionValues)
+                (cdr l)
+                outerFunctionEnvironment))))
+
 (define add-args-to-scope
-    (lambda (paramList argList shouldAddThis state)
+    (lambda (paramList argList state)
         (if (null? paramList)
             state
             (add-args-to-scope

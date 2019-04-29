@@ -28,8 +28,6 @@ class C extends B {
   }
 
   static function main() {
-    var a = new A();
-    var b = new B();
     var c = new C();
 
     return c.addAll() + c.multiplyAll() + c.addAndMultiplyAll();

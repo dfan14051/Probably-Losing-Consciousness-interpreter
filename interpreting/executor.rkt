@@ -15,6 +15,8 @@
 
 (define execute-parse-tree
     (lambda (parseTree state return throw [break '()])
+        ;;; (displayln (car parseTree))
+        ;;; (displayln state)
         (cond
             ;; Base cases
             [(null? parseTree)
@@ -27,7 +29,7 @@
                     (pop-scope (cadr
                         (execute-parse-tree
                             (cdar parseTree)
-                            (push-scope state)
+                            (push-empty-scope state)
                             return throw break)))
                     return throw break)]
             [(eq? 'funcall (caar parseTree))
@@ -178,7 +180,7 @@
                  (call/cc (lambda (k) (doFinally (cadr
                     (execute-parse-tree
                         (cadar parseTree)
-                        (push-scope baseState)
+                        (push-empty-scope baseState)
                         (lambda (v)
                             (k (baseReturn
                                 v
@@ -202,7 +204,7 @@
                                 exception
                                 (add-var-to-state
                                     (caadr (caddar parseTree))
-                                    (push-scope baseState)))
+                                    (push-empty-scope baseState)))
                             (lambda (v)
                                 (k (baseReturn
                                     v)))

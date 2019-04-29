@@ -214,36 +214,48 @@
     ; param execute-parse-tree The function to call for executing a parse tree, such as a function body
     ; param throw The function to use in the case of a throw in a function call
     (lambda (command state execute-parse-tree throw)
-        (set-var-value
-            (cadr command)
-            (evaluate-parse-tree
-                (caddr command)
-                state
-                update-state-from-parse-tree
-                update-state-from-command-list
-                execute-parse-tree
-                throw)
-            (update-state-from-parse-tree
-                (caddr command)
-                state
-                execute-parse-tree
-                throw))))
+        (if (and (pair? (cadr command)) (eq? 'dot (caadr command)))
+            (begin
+                (update-state-from-var-assign
+                    (cons (car command) (cons (caddr (cadr command)) (cddr command)))
+                    (get-var-value (cadadr command) state)
+                    execute-parse-tree
+                    throw)
+                state)
+            (set-var-value
+                (cadr command)
+                (evaluate-parse-tree
+                    (caddr command)
+                    state
+                    update-state-from-parse-tree
+                    update-state-from-command-list
+                    execute-parse-tree
+                    throw)
+                (update-state-from-parse-tree
+                    (caddr command)
+                    state
+                    execute-parse-tree
+                    throw)))))
 
 ;; Assigns a function body to a name in the new state
 (define update-state-from-function-declaration
     ; param command The command to execute
     ; param state The current state
     (lambda (command state)
-        ((lambda (funcName)
+        ((lambda (funcName isStatic)
             (set-var-value
                 funcName
                 (create-function-data
                     command
-                    state)
-                (add-var-to-state
-                    funcName
-                    state)))
-            (cadr command))))
+                    state
+                    isStatic)
+                (if (does-var-name-exist-in-state funcName state)
+                    state
+                    (add-var-to-state
+                        funcName
+                        state))))
+            (cadr command)
+            (eq? 'static-function (car command)))))
 
 (define update-state-from-unary-operation-side
     ; param command The command to execute
