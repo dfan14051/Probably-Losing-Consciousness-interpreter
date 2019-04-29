@@ -15,8 +15,6 @@
 
 (define execute-parse-tree
     (lambda (parseTree state return throw [break '()])
-        ;;; (displayln (car parseTree))
-        ;;; (displayln state)
         (cond
             ;; Base cases
             [(null? parseTree)
@@ -182,9 +180,10 @@
                         (cadar parseTree)
                         (push-empty-scope baseState)
                         (lambda (v)
-                            (k (baseReturn
-                                v
-                                (doFinally))))
+                            (begin
+                                (doFinally baseState)
+                                (k (baseReturn
+                                    v))))
                         (lambda (e)
                             (k
                                 (doFinally (cadr
@@ -193,7 +192,7 @@
                             '()
                             (lambda ()
                                 (k (baseBreak
-                                    (doFinally)))))))))))
+                                    (doFinally baseState)))))))))))
                 (lambda (exception)
                     (if (null? (caddar parseTree))
                         '()
@@ -206,11 +205,13 @@
                                     (caadr (caddar parseTree))
                                     (push-empty-scope baseState)))
                             (lambda (v)
-                                (k (baseReturn
-                                    v)))
+                                (begin
+                                    (doFinally baseState)
+                                    (k (baseReturn v))))
                             (lambda (e)
-                                (k (baseThrow
-                                    e)))
+                                (begin
+                                    (doFinally baseState)
+                                    (k (baseThrow e))))
                             (if (null? baseBreak)
                                 '()
                                 (lambda (s)

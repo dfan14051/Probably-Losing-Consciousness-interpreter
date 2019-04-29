@@ -68,22 +68,20 @@
     ; param varValue is the value to give the variable
     ; param state is the state to use
     (lambda (varExpr varValue state)
-        ;;; (displayln 'SET-VAR-VALUE)
-        ;;; (displayln varExpr)
-        ;;; (displayln varValue)
-        ;;; (displayln state)
         (cond
             [(null? state)
                 (error 
                     "variable not initialized"
                     (format "No variable named ~a, cannot set value" varExpr))]
             [(and (pair? varExpr) (eq? 'dot (car varExpr)))
-                (set-var-value
-                    (caddr varExpr)
-                    varValue
-                    (get-var-value
-                        (cadr varExpr)
-                        state))]
+                (begin
+                    (set-var-value
+                        (caddr varExpr)
+                        varValue
+                        (get-var-value
+                            (cadr varExpr)
+                            state))
+                    state)]
             [(not (does-var-exist-in-cur-scope? varExpr (get-current-scope-state state)))
                 (cons
                     (car state)
@@ -106,10 +104,6 @@
     ; param varName The variable name
     ; param state The state to find the variable's value in
     (lambda (varName state)
-        ;;; (displayln 'GET-VAR-VALUE)
-        ;;; (displayln varName)
-        ;;; (displayln (get-current-scope state))
-        ;;; (displayln state)
         (cond
             [(null? state)
                 (error 

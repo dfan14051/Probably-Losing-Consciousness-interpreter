@@ -175,8 +175,6 @@
 
 (define execute-class-body ; Used exclusively for constructors
     (lambda (remainingClassBodyParseTree objectState)
-        ;;; (displayln 'EXECUTING-CLASS-BODY)
-        ;;; (displayln objectState)
         (if (null? remainingClassBodyParseTree)
             objectState
             (execute-class-body

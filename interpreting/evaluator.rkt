@@ -23,7 +23,6 @@
     ; param execute-parse-tree The function to call for executing a parse tree, such as a function body
     ; param throw The function to pass in the case of a function call for throw
     (lambda (command state update-state-from-parse-tree update-state-from-command-list execute-parse-tree throw)
-        ;;; (displayln command)
         (cond
             ;;;; BASE CASES
             [(null? command)

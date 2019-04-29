@@ -25,13 +25,11 @@
                 (lambda (k)
                     (execute-parse-tree
                         (list (list 'return (list 'funcall (list 'dot mainClassName 'main))))
-                        (push-empty-scope 
-                            (load-global-state-from-parse-tree
-                                parseTree
-                                (create-state)
-                                execute-parse-tree
-                                base-throw
-                            ))
+                        (load-global-state-from-parse-tree
+                            parseTree
+                            (create-state)
+                            execute-parse-tree
+                            base-throw)
                         (lambda (value)
                             (k value))
                         base-throw))))

@@ -18,16 +18,11 @@
     ;; param outerFunctionEnvironment The outer function environment
     ;; param isStatic Whether the function is static
     (lambda (command outerFunctionEnvironment isStatic)
-        ;;; (displayln 'CREATING-FUNCTION-DATA)
-        ;;; (displayln command)
-        ;;; (displayln outerFunctionEnvironment)
-        ;;; (displayln isStatic)
         ((lambda (paramList bodyParseTree this super)
             (list
                 paramList
                 bodyParseTree
                 (lambda (argList functionEnvironment)
-                    ;;; (displayln argList)
                     (add-args-to-scope
                         ; Possibly add this and super to the paramList
                         (if isStatic
@@ -52,7 +47,7 @@
     (lambda (outerFunctionEnvironment)
         (if (null? outerFunctionEnvironment)
             '()
-            (create-state-from-scope (get-current-scope outerFunctionEnvironment)))))
+            outerFunctionEnvironment)))
 
 (define create-super
     (lambda (outerFunctionEnvironment)
@@ -62,7 +57,7 @@
                 (push-scope
                     (car instance-functions)
                     (cadr instance-functions)
-                    (create-state-from-scope (get-current-scope (pop-scope outerFunctionEnvironment)))))
+                    (pop-scope outerFunctionEnvironment)))
                 (get-instance-functions-from-outer-function-environment
                     (pop-scope outerFunctionEnvironment))))))
 
